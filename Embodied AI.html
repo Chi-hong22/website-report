@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>具身智能 Embodied AI</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Preline UI -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline/dist/preline.min.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 自定义样式 -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    typography: {
+                        DEFAULT: {
+                            css: {
+                                maxWidth: '100ch',
+                            }
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    },
+                },
+            },
+            plugins: [],
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 图片放大效果 */
+        .img-zoom {
+            transition: transform 0.3s ease;
+        }
+        
+        .img-zoom:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 卡片悬停效果 */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.1), 0 10px 10px -5px rgba(255, 255, 255, 0.04);
+        }
+        
+        /* 平滑滚动效果 */
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+    <!-- 主要内容容器 -->
+    <div class="min-h-screen flex flex-col">
+        <!-- 顶部导航栏 -->
+        <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-blue-600 text-2xl mr-2"></i>
+                    <span class="text-xl font-bold">具身智能 Embodied AI</span>
+                </div>
+                
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#introduction" class="hover:text-blue-600 transition-colors">概述</a>
+                    <a href="#embodied-perception" class="hover:text-blue-600 transition-colors">具身感知</a>
+                    <a href="#embodied-interaction" class="hover:text-blue-600 transition-colors">具身交互</a>
+                    <a href="#embodied-agent" class="hover:text-blue-600 transition-colors">具身智能体</a>
+                    <a href="#relevant-to-us" class="hover:text-blue-600 transition-colors">AUV</a>
+                    <a href="#references" class="hover:text-blue-600 transition-colors">资源</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- 目录按钮 -->
+                    <button id="toggle-toc" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-list-ul"></i>
+                        <span class="ml-1 hidden md:inline">目录</span>
+                    </button>
+                    
+                    <!-- 深色模式切换 -->
+                    <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-sun dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:inline"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 标题区域 - 蓝色背景 -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white py-16 px-4">
+            <div class="container mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">具身智能 Embodied AI</h1>
+                <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-6">探索人工智能前沿技术与应用</p>
+                
+                <div class="mt-8 flex justify-center space-x-4">
+                    <a href="#introduction" class="bg-white text-blue-600 hover:bg-gray-100 px-6 py-2 rounded-md font-medium transition-colors">
+                        开始探索
+                    </a>
+                    <a href="#references" class="bg-transparent border border-white text-white hover:bg-white/10 px-6 py-2 rounded-md font-medium transition-colors">
+                        查看资源
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 更新时间条 -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 py-3 px-4">
+            <div class="container mx-auto flex items-center text-sm text-gray-600 dark:text-gray-300">
+                <i class="fas fa-clock mr-2"></i>
+                <span>更新时间: 2025年5月9日</span>
+            </div>
+        </div>
+        
+        <!-- 主体内容 -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- 目录侧边栏（默认隐藏在移动设备上） -->
+                <aside id="toc" class="hidden lg:block lg:w-1/4 xl:w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto pr-4 transition-all duration-300">
+                    <nav class="space-y-1 dark:border-gray-700">
+                        <h2 class="text-lg font-bold mb-4 flex items-center justify-between">
+                            <span>目录</span>
+                            <button id="close-toc" class="lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </h2>
+                        <!-- 目录内容将通过JS动态生成 -->
+                        <div id="toc-content" class="space-y-2"></div>
+                    </nav>
+                </aside>
+                
+                <!-- 内容区域 -->
+                <div id="content" class="w-full lg:w-3/4 xl:w-4/5 animate-fade-in">
+                    <!-- 内容将在后续添加 -->
+                    <h1 class="text-3xl md:text-4xl font-bold mb-6">具身智能 Embodied AI</h1>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-8 rounded-r">
+                        <p class="text-sm text-gray-600 dark:text-gray-300">更新时间：Friday 9th May 2025 21:22:39</p>
+                    </div>
+
+                    <!-- 1. 引言 -->
+                    <section id="introduction" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">1. 引言</h2>
+                        
+                        <!-- 1.1 具身智能的概念 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.1 具身智能的概念</h3>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    具身智能是指一种基于物理身体进行感知和行动的智能系统，其通过智能体与环境的交互获取信息、理解问题、做出决策并实现行动，从而产生智能行为和适应性。
+                                </p>
+                            </div>
+                            
+                            <p class="mb-4">更狭义具体的描述: 集成环境理解、智能交互、认知推理、规划执行于一体的系统化方案</p>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_1.png" alt="具身智能概念图" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <p class="mb-4">如今，具身智能包含了计算机视觉（CV）、自然语言处理（NLP）和机器人技术等各种关键技术。对于一个具身任务，具身智能体必须充分理解语言指令中的人类意图，积极探索周围环境，全面感知来自虚拟和物理环境的多模态元素，并为复杂任务执行适当的行动。</p>
+                        </div>
+                        
+                        <!-- 1.2 起源与背景 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.2 起源与背景</h3>
+                            
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>图灵测试的启发</strong>：具身AI最初由艾伦·图灵在1950年提出的图灵测试引出。图灵测试旨在判断智能体是否能表现出与人类智能相当的智能行为，而具身AI则进一步强调智能体不仅要在虚拟环境中解决抽象问题，还要能与物理世界进行交互。</li>
+                                <li><strong>具身AI的定义</strong>：具身AI关注的是智能体在物理世界中的感知、交互和行动能力，与无体AI（如聊天机器人）相对，它更加注重与物理环境的紧密结合。</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 1.3 技术演进 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.3 技术演进</h3>
+                            
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>多模态大型模型（MLMs）的出现</strong>：近年来，MLMs的出现显著提升了具身AI的感知、交互和推理能力。这些模型能够整合多种模态的信息（如视觉、语言等），使智能体对环境的理解更加全面和深入。</li>
+                                <li><strong>世界模型（WMs）的发展</strong>：WMs通过模拟和预测环境的动态变化，为具身AI提供了更强大的规划和决策支持，使其能够更好地适应复杂多变的物理世界。</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 1.4 研究现状 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.4 研究现状</h3>
+                            
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>研究热度</strong>：文章引用了谷歌学术的搜索结果，显示具身AI领域的研究热度自2023年起呈现指数级增长，这表明该领域受到了研究界的广泛关注。</li>
+                                <li><strong>研究局限</strong>：尽管MLMs为具身AI带来了显著进展，但当前研究仍存在局限性，如模型在长期记忆、复杂意图理解和任务分解方面的能力有限。</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 1.5 具身机器人的分类和应用场景 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.5 具身机器人的分类和应用场景</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">固定基机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">这类机器人通常用于实验室自动化、教育培训和工业制造。它们具有高精度和稳定性，适合需要精确操作的任务，但灵活性较低。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">轮式机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">以其高效机动性著称，广泛应用于物流、仓储和安全检查。它们适合平坦表面的快速移动，但在复杂地形中的机动性有限。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">履带式机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">具有强大的越野能力和机动性，适用于农业、建筑和灾难恢复等场景。它们在复杂地形上表现出色，但能效较低。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">四足机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">以其稳定性和适应性闻名，适合复杂地形探索、救援任务和军事应用。它们能够模仿生物运动，实现在不平坦表面上的平衡和机动性。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">仿人机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">以其类人形态设计，广泛应用于服务行业、医疗保健和协作环境。它们能够执行复杂和精细的任务，如医疗手术和精密制造。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">生物模拟机器人</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">通过模仿自然生物体的运动和功能，在医疗保健、环境监测和生物研究等领域展现出巨大潜力。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 1.6 主流基础技术路线 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">1.6 主流基础技术路线</h3>
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_2.png" alt="主流基础技术路线" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    <span class="font-semibold text-red-600 dark:text-red-400">注意：</span> 最近看了清华智能技术与系统实验室的一个副主任讲的演讲，他觉得目前的机器人公司都误入歧途，走的都是动作捕捉+强化学习的路线，更多是用姿态数据，但是视觉、压力等传感器数据的参与太少，导致泛化能力差，负载适应性太差。但是这种路线出片快，容易拉投资。
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. 具身感知 -->
+                    <section id="embodied-perception" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">2. Embodied Perception - 具身感知</h2>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                与传统的图像中的对象识别不同，具有具身感知的智能体必须在物理世界中移动并与环境互动。这要求对3D空间和动态环境有更深入的理解。具身感知需要视觉感知和推理，理解场景中的3D关系，并基于视觉信息预测和执行复杂任务。
+                            </p>
+                        </div>
+                        
+                        <!-- 2.1 主动视觉感知 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">2.1 Active Visual Perception - 主动视觉感知</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    主动视觉感知系统需要基本能力，如状态估计、场景感知和环境探索。这些能力已在视觉 SLAM (vSLAM）、3D场景理解（3D Scene Understanding）和主动探索（Active Exploration）等领域进行了广泛研究。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    主动视觉感知系统需要被动视觉感知提供的基础信息（如环境的几何地图和场景理解），同时通过主动探索来增强和扩展这些信息。这种结合使得机器人能够在复杂环境中进行更有效的导航和交互。
+                                </p>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_3.png" alt="主动视觉感知" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <ul class="list-disc pl-6 space-y-3">
+                                <li>
+                                    <strong>Visual SLAM（视觉同时定位与地图构建）</strong>：使用摄像头捕获的图像来确定智能体在环境中的位置，并构建环境的地图。
+                                    <ul class="list-circle pl-6 mt-2 space-y-1">
+                                        <li>传统vSLAM：使用图像信息和多视图几何原理估计机器人姿态，构建低级地图。</li>
+                                        <li>语义vSLAM：结合语义信息，提高机器人感知和导航能力，通过对象识别和跟踪创建语义地图。</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>3D Scene Understanding（3D场景理解）</strong>：对3D场景数据进行分析，以识别和理解场景中的对象及其位置和几何属性。
+                                </li>
+                                <li>
+                                    <strong>Active Exploration（主动探索）</strong>：智能体通过自主移动和交互来获取更多的环境信息，增强被动视觉感知系统, 智能体通过与环境的交互或改变观察方向来获取更多视觉信息，如基于好奇心的探索和基于信息增益的探索。
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 2.2 3D视觉定位 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">2.2 3D Visual Grounding - 3D视觉定位</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    3D视觉定位结合了深度、透视和对象之间的空间关系，为智能体与其环境的交互提供了更加强大的框架。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    3D视觉定位旨在使用<strong>自然语言描述在3D环境中定位对象</strong>，要求智能体理解语言指令，并在复杂场景中准确找到对应物体。
+                                </p>
+                            </div>
+                            
+                            <p class="mb-4">文章将3D视觉定位的方法主要分为两类：两阶段方法和一阶段方法:</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="my-3">
+                                    <img src="attachments/具身智能 Embodied AI_image_4.png" alt="3D视觉定位方法" class="rounded-lg shadow-md img-zoom">
+                                </div>
+                                <div class="my-3">
+                                    <img src="attachments/具身智能 Embodied AI_image_5.png" alt="3D视觉定位方法示例" class="rounded-lg shadow-md img-zoom">
+                                </div>
+                            </div>
+                            
+                            <!-- 2.2.1 Two-stage -->
+                            <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6">
+                                <h4 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-3">2.2.1 Two-stage</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        先使用预训练的检测器或分割器从3D场景中提取对象特征，再将这些特征与语言查询特征融合以匹配目标对象。两阶段研究的重点是第二阶段，例如探索对象提议特征与语言查询特征之间的相关性以选择最佳匹配对象。
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        <span class="font-semibold">存在的问题:</span> 这些两阶段方法面临着确定提议数量的困境，因为第一阶段中的3D检测器需要采样关键点来表示整个3D场景，并为每个关键点生成相应的 Proposal。
+                                    </p>
+                                    <ul class="list-disc pl-6 mt-2 space-y-1 text-gray-700 dark:text-gray-300">
+                                        <li>稀疏 Proposal可能会在第一阶段忽视目标，使它们在第二阶段无法匹配</li>
+                                        <li>密集 Proposal可能包含不可避免的冗余对象，导致由于过于复杂的提议间关系而在第二阶段难以区分目标</li>
+                                        <li>关键点采样策略是与语言无关的，这增加了检测器识别与语言相关的提议的难度</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- 2.2.2 One-stage -->
+                            <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6">
+                                <h4 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-3">2.2.2 One-stage</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        整合了由语言查询指导的对象检测和特征提取，使定位对象变得更加容易。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 2.3 视觉语言导航 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">2.3 Visual Language Navigation - 视觉语言导航</h3>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                    视觉语言导航是具身人工智能（Embodied AI）的关键研究问题，旨在使智能体能够在未见环境中遵循语言指令进行导航。VLN要求机器人不仅要理解复杂多样的视觉观察，而且还要解释不同粒度的指令。
+                                </p>
+                            </div>
+                            
+                            <p class="mb-4">VLN的输入通常由两部分组成：</p>
+                            
+                            <ul class="list-disc pl-6 space-y-2 mb-4">
+                                <li><strong>视觉信息</strong>可以是过去轨迹的视频，或者是一组历史当前观察图像。</li>
+                                <li><strong>自然语言指令</strong>包括具身智能体需要到达的目标，或者是预期完成的任务。</li>
+                            </ul>
+                            
+                            <p class="mb-4">具身智能体必须使用上述信息从候选列表中选择一个或一系列动作来满足自然语言指令的要求。这个过程可以表示为：</p>
+                            
+                            <div class="bg-gray-100 dark:bg-gray-800 p-3 text-center mb-6 rounded">
+                                <p class="text-lg font-mono">Action=M(O,H,I)</p>
+                            </div>
+                            
+                            <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">其中 Action 是选择的动作或动作候选列表，O 是当前观察，H 是历史信息，I 是自然语言指令。</p>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_6.png" alt="视觉语言导航" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>左图展示了 VLN 的整体逻辑, 机器人智能体通过自然语言与人类进行通信。人类向智能体发出指令，智能体完成诸如规划和对话之类的任务。随后，通过协作合作或独立动作，基于视觉观察和指令在交互或非交互环境中做出交互。</p>
+                                <p class="mt-2">右图展示了VLN的不同任务。</p>
+                            </div>
+                            
+                            <p class="mb-4">随着LLMs的惊人表现，VLN的方向和焦点已经发生了深刻的变化。</p>
+                            
+                            <p class="mb-4">尽管如此，VLN方法可以分为两个方向：</p>
+                            
+                            <ul class="list-disc pl-6 space-y-2 mb-4">
+                                <li><strong>基于记忆理解的方法</strong>侧重于环境的感知和理解，以及基于历史观察或轨迹的模型设计</li>
+                                <li><strong>基于未来预测的方法</strong>更加关注建模、预测和理解未来状态</li>
+                            </ul>
+                            
+                            <p class="mb-4">由于VLN可以被视为部分可观测的马尔可夫决策过程，其中未来的观察依赖于当前的环境和智能体的动作，历史信息对导航决策具有重要意义，尤其是长跨度导航决策，因此<em class="text-primary-600 dark:text-primary-400">基于记忆理解的方法一直是VLN的主流</em>。</p>
+                            
+                            <p>然而，基于未来预测的方法仍然具有重要意义。其对环境的基本理解在连续环境中的VLN具有巨大价值，特别是随着世界模型概念的兴起，基于未来预测的方法正受到越来越多的研究关注。</p>
+                        </div>
+                        
+                        <!-- 2.4 非视觉感知 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">2.4 Non-Visual Perception: Tactile - 非视觉感知：触觉</h3>
+                            
+                            <p class="mb-4">触觉传感器为智能体提供了如纹理、硬度和温度等详细信息。对于相同的动作，从视觉和触觉传感器中学到的知识可能是相关和互补的，使机器人能够充分掌握手中的高精度任务。</p>
+                        </div>
+                        
+                        <!-- 2.5 视觉基础模型 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">2.5 视觉基础模型</h3>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">1. 视觉-语言模型（多模态对齐）</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200 font-medium">VLM (Vision-Language Model)</p>
+                                    <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                        即视觉语言模型，是一种能够<strong>理解和处理视觉信息（如图像、视频）和文本信息（自然语言）</strong>，并在这两种模态之间建立联系的人工智能模型。它们的目标是让机器能够像人类一样，结合"看"和"读"来理解世界、进行推理和生成内容。
+                                    </p>
+                                    <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                        <strong>核心思想：</strong>人类通过多种感官（视觉、听觉、触觉等）与世界互动，并将这些信息整合起来形成认知。VLM 试图模仿这种多模态学习能力，特别是视觉和语言这两种最主要的信息模态。
+                                    </p>
+                                </div>
+                                
+                                <ul class="space-y-3">
+                                    <li class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                            <i class="fas fa-link text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p><strong>CLIP</strong>: <a href="https://github.com/openai/CLIP" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">GitHub</a>, 来自 OpenAI 的研究, 最基本的应用是可以计算图像与语言描述的相似度, 中间层的视觉特征对各种下游应用非常有帮助。</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                            <i class="fas fa-link text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p><strong>SigLIP</strong>: <a href="https://huggingface.co/docs/transformers/en/model_doc/siglip" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">Hugging Face</a>, 类似 CLIP</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">2. 视觉特征提取模型</h4>
+                                
+                                <ul class="space-y-3">
+                                    <li class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                            <i class="fas fa-link text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p><strong>DINO</strong>: <a href="https://github.com/facebookresearch/dino" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">DINO repo</a>, <a href="https://github.com/facebookresearch/dinov2" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">DINO-v2 repo</a>, 来自 Meta 的研究, 可以提供图像的高层视觉特征, 对 corresponding 之类的信息提取非常有帮助, 比如不同个体之间的鼻子都有类似的几何特征, 这个时候不同图像中关于不同鼻子的视觉特征值可能是近似的。</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                            <i class="fas fa-link text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p><strong>Point Transformer (v3)</strong>: <a href="https://github.com/Pointcept/PointTransformerV3" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, 点云特征提取的工作。</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">3. 图像分割模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>SAM</strong>: <a href="https://segment-anything.com/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">website</a>, 来自 Meta 的研究, 可以基于提示点或者框, 对图像的物体进行分割。</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>SAM2</strong>: <a href="https://ai.meta.com/sam2/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">website</a>, 来自 Meta 的研究, SAM 的升级版, 可以在视频层面持续对物体进行分割追踪。</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>Grounded-SAM</strong>: <a href="https://github.com/IDEA-Research/Grounded-SAM-2" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, 比 Grounding-DINO 多了一个分割功能, 也就是支持检测后分割, 也有很多下游应用, 具体可以翻一下 README。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">4. 目标检测模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>Grounding-DINO</strong>: <a href="https://github.com/IDEA-Research/GroundingDINO" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, <a href="https://deepdataspace.com/playground/grounding_dino" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">在线尝试</a>, <strong>这个 DINO 与上面 Meta 的 DINO 没有关系</strong>, 是一个由 IDEA 研究院 (做了很多不错开源项目的机构) 开发集成的图像目标检测的框架, 很多时候需要对目标物体进行检测的时候可以考虑使用。</p>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>OmDet-Turbo</strong>: <a href="https://github.com/om-ai-lab/OmDet" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, 一个由 OmAI Lab 开源的研究, 提供 OVD（开放词表目标检测）能力, 优点在于推理速度非常快（100+FPS）, 适合需要高 FPS 的自定义目标物体检测场景。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">5. 深度估计模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>Depth Anything (v1 & v2)</strong>: <a href="https://github.com/LiheYoung/Depth-Anything" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, <a href="https://github.com/DepthAnything/Depth-Anything-V2" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, 港大和字节的研究工作, 单目深度估计模型。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">6. 姿态估计模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>FoundationPose</strong>: <a href="https://github.com/NVlabs/FoundationPose" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">website</a>, 来自 Nvidia 的研究, 物体姿态追踪模型。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">7. 图像生成模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>Stable Diffusion</strong>: <a href="https://github.com/CompVis/stable-diffusion" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a>, <a href="https://ommer-lab.com/research/latent-diffusion-models/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">website</a>, 22 年的文生图模型, 现在虽然不是 SOTA 了, 但是依然可以作为不错的应用, 例如中间层特征支持下游应用、生成 Goal Image (目标状态) 等等。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <h4 class="text-lg font-medium mb-3">8. 3D/点云与语言相关模型</h4>
+                                    
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                                <i class="fas fa-link text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p><strong>OpenAD</strong>: <a href="https://github.com/Fsoft-AIC/Open-Vocabulary-Affordance-Detection-in-3D-Point-Clouds" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">repo</a> 实现语言标签与点云视觉特征之间的映射。</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">9. 机器人操作模型</h4>
+                                
+                                <ul class="space-y-3">
+                                    <li class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mr-2">
+                                            <i class="fas fa-link text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p><strong>RDT-1B</strong>: <a href="https://rdt-robotics.github.io/rdt-robotics/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">website</a>, 清华朱军老师团队的工作, 机器人双臂操作的基础模型, 具有强大的 few-shot 能力。</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. 具身交互 -->
+                    <section id="embodied-interaction" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">3. Embodied Interaction - 具身交互</h2>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200">
+                                具身交互任务指的是智能体在物理或模拟空间中与人类和环境进行交互的场景。
+                            </p>
+                            <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                关注的重点是<strong>我们如何使用神经网络输出的结果</strong>
+                            </p>
+                        </div>
+                        
+                        <!-- 3.1 生成式模仿学习 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">3.1 Generative Imitation Learning - 生成式模仿学习</h3>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">生成式模仿学习</p>
+                                <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                    直接将 state 当作时间序列进行处理，输出每个 joint 的时间序列
+                                </p>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_7.png" alt="生成式模仿学习" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>Tony Z. Zhao et. al., Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware, 2023</p>
+                                <p>Cheng Chi et. al., Diffusion Policy: Visuomotor Policy Learning via Action Diffusion, 2023</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 3.2 可供性锚定 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">3.2 Affordance Grounding - 可供性锚定</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    可供性锚定任务的目标是从图像中定位物体上能够与之交互的区域，充当了感知与行动之间的桥梁，是具身智能重要的一环。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    它不仅需要模型对物体及其局部结构的检测与识别，还需要模型理解物体与人或机器人之间的潜在互动关系。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    例如，在机器人抓取场景中，可供性锚定帮助模型寻找物体上最佳的抓取位置，从而确定最佳抓取角度。该方向通过整合计算机视觉，多模态大模型技术，能够在弱监督或零样本条件下实现对物体交互可能性的精确定位，提升机器人抓取、操作以及人机交互等任务的性能。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3 font-medium">
+                                    输入: 视觉数据<br/>
+                                    输出:
+                                </p>
+                                <ol class="list-decimal pl-8 mt-2 text-gray-700 dark:text-gray-300">
+                                    <li>contact points: 哪些像素/位置/部位可以操作</li>
+                                    <li>trajectory: 如何操作--方向等</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_8.png" alt="可供性锚定" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>Shikhar Bahl et. al., Affordances from Human Videos as a Versatile Representation for Robotics, 2023</p>
+                                <p>Juntao Jian et. al., AffordPose: A Large-scale Dataset of Hand-Object Interactions with Affordance-driven Hand Pose, 2023</p>
+                                <p>SceneFun3D et. al., SceneFun3D: Fine-Grained Functionality and Affordance Understanding in 3D Scenes, 2024</p>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                                <h4 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-4">相关工作:</h4>
+                                
+                                <div class="space-y-6">
+                                    <div>
+                                        <h5 class="font-semibold mb-2">2D</h5>
+                                        <ul class="space-y-2 pl-5 list-disc text-gray-700 dark:text-gray-300">
+                                            <li>跨视角学习可供性：<strong>Cross-View-AG</strong>, <a href="https://arxiv.org/pdf/2203.09905" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">paper</a>: 第三视角图像提供他者如何与物体交互的信息，帮助模型学习如何与第一视角图像中的物体交互。</li>
+                                            <li>单视角学习可供性：<strong>AffordanceLLM</strong>, <a href="https://arxiv.org/pdf/2401.06341" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">paper</a>：通过利用预训练的大规模视觉语言模型中的丰富知识，显著提升了物体可供性锚定在未见对象和动作上的泛化能力。</li>
+                                            <li>数据集：<strong>AGD20K</strong>, <a href="https://github.com/lhc1224/Cross-View-AG" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">page</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <h5 class="font-semibold mb-2">3D</h5>
+                                        <ul class="space-y-2 pl-5 list-disc text-gray-700 dark:text-gray-300">
+                                            <li>基于点云的可供性锚定：<strong>OpenAD</strong>, <a href="https://arxiv.org/pdf/2203.09905" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">paper</a></li>
+                                            <li>室内环境任务中的可供性锚定：<strong>SceneFun3D</strong>, <a href="https://arxiv.org/pdf/2401.06341" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">paper</a></li>
+                                            <li>点云数据集：<strong>3D AffordanceNet</strong>, <a href="https://github.com/lhc1224/Cross-View-AG" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">page</a>，专注于物体层面的可供性锚定。</li>
+                                            <li>实物数据集：<strong>SceneFun3D</strong>, <a href="https://scenefun3d.github.io/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">page</a>，强调在真实室内环境的应用。</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 3.3 具身问答 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">3.3 Embodied Question Answering - 具身问答</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    对于EQA任务，智能体需要从第一人称视角探索环境，以收集回答给定问题所需的信息。具有自主探索和决策能力的智能体不仅要考虑采取哪些行动来探索环境，还要决定何时停止探索以回答问题。
+                                </p>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_9.png" alt="具身问答" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>灰框显示智能体在探索过程中观察到的场景。</p>
+                                <p>其他框显示各种类型的问答任务。</p>
+                                <p>除了根据情景记忆回答问题的任务外，一旦主体收集到足够的信息来回答问题，就会停止探索。</p>
+                            </div>
+                            
+                            <p class="mb-4">具身问题回答任务主要涉及导航和问题回答子任务，实现方法大致分为两类：</p>
+                            
+                            <ul class="list-disc pl-6 space-y-2 mb-4">
+                                <li>基于神经网络的方法</li>
+                                <li>基于大型语言模型(LLMs)/视觉-语言模型(VLMs)</li>
+                            </ul>
+                            
+                            <!-- 3.3.1 基于神经网络的方法 -->
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">3.3.1 基于神经网络的方法</h4>
+                                
+                                <p class="mb-4">在早期工作中，研究人员主要通过构建深度神经网络来解决具身问题回答任务。他们使用模仿学习、强化学习等技术来训练和微调这些模型，以提高性能。</p>
+                            </div>
+                            
+                            <!-- 3.3.2 基于 LLMs/VLMs -->
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">3.3.2 基于 LLMs/VLMs</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        直接利用 LLM 做 Q&A<br/>
+                                        运用 LLM 的理解与推理能力, 直接通过文本输出提取出目标的位置与运动方向
+                                    </p>
+                                </div>
+                                
+                                <div class="my-6">
+                                    <img src="attachments/具身智能 Embodied AI_image_10.png" alt="基于LLM的具身问答" class="rounded-lg shadow-md img-zoom mx-auto">
+                                </div>
+                                
+                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                    <p>Xiaoqi Li et. al., ManipLLM: Embodied Multimodal Large Language Model for Object-Centric Robotic Manipulation, 2023</p>
+                                    <p>Siyuan Huang et. al., ManipVQA: Injecting Robotic Affordance and Physically Grounded Information into Multi-Modal Large Language Models, 2023</p>
+                                </div>
+                                
+                                <!-- 3.3.2.1 Vision-Language-Action Models -->
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6">
+                                    <h5 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-3">3.3.2.1 Vision-Language-Action Models - VLA</h5>
+                                    
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+                                        <p class="text-gray-800 dark:text-gray-200">
+                                            <strong>Vision-Language-Action Models (VLA 模型)</strong> 是一种结合 <strong>VLM (Vision-Language Model)</strong> 与机器人控制的模型，旨在将预训练的 VLM 直接用于生成机器人动作 (RT-2 中定义)。和以往利用 VLM 做 planning 以及 build from strach 的方法不同，VLA 无需重新设计新的架构，将动作转化为 token，微调 VLM。
+                                        </p>
+                                    </div>
+                                    
+                                    <p class="mb-4"><strong>VLA 的特点</strong>：端到端，使用 LLM/VLM backbone，加载预训练模型, etc.</p>
+                                    
+                                    <p class="mb-4">目前的 VLA 可以从以下几个方面进行区分：模型结构&大小 (如 action head 的设计, tokenize 的方法如 FAST)，预训练与微调策略和数据集，输入和输出 (2D vs. 3D | TraceVLA 输入 visual trace)，不同的应用场景等。</p>
+                                    
+                                    <div class="mt-4">
+                                        <p class="font-medium">参考资料：</p>
+                                        <ul class="space-y-1 pl-5 list-disc text-gray-700 dark:text-gray-300">
+                                            <li>Blog: <a href="https://zhuanlan.zhihu.com/p/9880769870" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">具身智能Vision-Language-Action的思考</a>, <a href="https://www.zhihu.com/question/655570660/answer/87040917575" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">zhihu</a></li>
+                                            <li>Survey: <a href="https://arxiv.org/abs/2405.14093" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">A Survey on Vision-Language-Action Models for Embodied AI</a>, 2024.11.28</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- 3.3.2.1.1 双系统分层 VLA -->
+                                    <div class="mt-6">
+                                        <h6 class="font-medium text-primary-600 dark:text-primary-400 mb-2">3.3.2.1.1 双系统分层 VLA</h6>
+                                        
+                                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r">
+                                            <p class="text-gray-800 dark:text-gray-200">
+                                                目前 VLA 的一大范式是采用分层双系统架构，模拟人类的快速反应（System 1）和深度思考（System 2）机制。
+                                                System 2 利用视觉语言模型（VLM）进行环境理解和任务规划，接收视觉、语言等多模态输入，并通过语言或潜在向量（Latent Vector）将信息传递给 System 1。
+                                                System 1 则将这些规划转化为精确的机器人动作。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 3.3.2.2 Visual Prompting -->
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6">
+                                    <h5 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-3">3.3.2.2 Visual Prompting - 视觉提示</h5>
+                                    
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+                                        <p class="text-gray-800 dark:text-gray-200">
+                                            视觉提示是一种利用视觉输入引导大模型完成特定任务的方法。
+                                            它通过提供示例图像、标注或视觉线索，让模型理解任务要求，而无需额外训练。
+                                            例如，在机器人导航、操控等场景中，视觉提示可帮助模型适应新环境，提高泛化能力。
+                                            相比传统方法，视觉提示具备更强的灵活性和可扩展性，使具身智能系统能够通过视觉信息快速适应复杂任务。
+                                        </p>
+                                    </div>
+                                    
+                                    <ul class="space-y-1 pl-5 list-disc text-gray-700 dark:text-gray-300">
+                                        <li>视觉提示综述：<a href="https://arxiv.org/abs/2409.15310" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">paper</a></li>
+                                        <li><strong>PIVOT</strong>, <a href="https://pivot-prompt.github.io/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">page</a>: 通过将任务转化为迭代式视觉问答，实现在无需特定任务数据微调的情况下，zero-shot 控制机器人系统和进行空间推理。</li>
+                                        <li><strong>Set-of-Mark Visual Prompting for GPT-4V</strong>: <a href="https://som-gpt4v.github.io/" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">page</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- 3.3.2.3 Language Corrections -->
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-6">
+                                    <h5 class="text-lg font-medium text-primary-600 dark:text-primary-400 mb-3">3.3.2.3 Language Corrections</h5>
+                                    
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+                                        <p class="text-gray-800 dark:text-gray-200">
+                                            机器人在执行任务中不可避免会出现错误，人观察后如何纠正机器人的错误。
+                                            人给出文本/语音的提示，帮助机器人完成任务。
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="my-6">
+                                        <img src="attachments/具身智能 Embodied AI_image_11.png" alt="语言纠正" class="rounded-lg shadow-md img-zoom mx-auto">
+                                    </div>
+                                    
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                        <p>Shi L X et al. Yell At Your Robot: Improving On-the-Fly from Language Corrections, 2024.</p>
+                                        <p>Liu H et al. Interactive robot learning from verbal correction, 2023.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. 具身智能体 -->
+                    <section id="embodied-agent" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">4. Embodied Agent - 具身智能体</h2>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200 font-medium">智能体</p>
+                            <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                智能体被定义为能够感知其环境并采取行动以实现特定目标的自主实体。
+                            </p>
+                            <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                最近在多模态大型模型（MLMs）方面的进展进一步扩展了智能体在实际场景中的应用。当这些基于MLM的智能体被具身化到物理实体中时，它们能够有效地将它们的能力从虚拟空间转移到物理世界，从而成为具身智能体。
+                            </p>
+                        </div>
+                        
+                        <p class="mb-4">为了完成一个任务，具身智能体通常涉及以下过程：</p>
+                        
+                        <ol class="list-decimal pl-6 space-y-2 mb-6">
+                            <li><strong>高水平的具身任务规划</strong>: 将抽象和复杂的任务分解为特定的子任务</li>
+                            <li><strong>低水平的具身动作规划</strong>: 通过有效利用具身感知和具身交互模型或利用基础模型的策略功能逐步实施这些子任务</li>
+                        </ol>
+                        
+                        <!-- 4.1 具身任务规划 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">4.1 Embodied Task Planning - 具身任务规划</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    将复杂的 Prompt 进行拆解为细致简单的任务Prompt
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">三种任务规划方法:</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">利用LLMs的自身推理进行规划</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">利用 LLMs内部世界知识进行任务分解，并通过思维链推理，类似于人类在行动前的推理过程。</p>
+                                    </div>
+                                    
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">利用具身感知模型的视觉信息进行规划</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">将视觉信息进一步整合到任务规划（或重新规划）中尤为重要。在此过程中，由视觉输入提供的对象标签、位置或描述可以为LLMs的任务分解和执行提供关键参考。通过视觉信息，LLMs可以更准确地识别当前环境中的目标对象和障碍物，从而优化任务步骤或修改子任务目标。</p>
+                                    </div>
+                                    
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">利用VLMs进行规划</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">与使用外部视觉模型将环境信息转换为文本不同，VLM模型可以在潜在空间中捕捉视觉细节，特别是难以用对象标签表示的上下文信息。VLM能够识别视觉现象背后的规则；例如，即使毛巾在环境中不可见，也可以推断毛巾可能存放在柜子里。这个过程本质上展示了如何在潜在空间中更有效地对齐抽象的视觉特征和结构化的文本特征。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 4.2 具身动作规划 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">4.2 Embodied Action Planning - 具身动作规划</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    因为任务规划提供的子任务粒度不足以指导智能体在环境互动中，故在进行任务规划之后, 就需要进行动作规划。
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">两种动作规划方式：</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">使用预训练模型作为工具</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">使用预训练的具身感知和具身干预模型作为工具，通过API逐步完成任务规划指定的子任务。为LLMs提供各种训练有素的政策模型的定义和描述作为上下文，使它们能够理解这些工具并决定如何以及何时为特定任务调用它们。</p>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">一系列更细粒度的工具可以抽象成一个函数库以供调用，而不是直接传递子任务所需的参数给导航和交互。</p>
+                                    </div>
+                                    
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">利用VLA模型的固有能力</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">在VLA模型中，感知、决策和执行模块的紧密整合使系统能够更有效地处理复杂任务并适应动态环境的变化。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_12.png" alt="具身动作规划" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>Yingdong Hu et. al., Look Before You Leap: Unveiling the Power of GPT-4V in Robotic Vision-Language Planning, 2023</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 4.3 具身控制 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">4.3 Embodied Control - 具身控制</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    具身控制通过与环境的交互学习，并使用奖励机制优化行为以获得最优策略，从而避免了传统物理建模方法的缺点。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    核心问题是让<em>机器人能够自己学会执行各种决策控制任务</em>
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    另一个表述为 Robot Learning <a href="https://zhuanlan.zhihu.com/p/26988866" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">最前沿：机器人学习Robot Learning的发展 - 知乎</a>
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="mb-4">具身控制方法可以分为以下几类, 研究的方向主要聚焦到第三和第四点：</p>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-4">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">利用传统的控制算法结合深度学习</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">来实现机器人端到端的控制</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-4">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">深度强化学习（Deep Reinforcement Learning）</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">DRL可以处理高维数据并学习复杂的行为模式，使其适合于决策和控制。但是最大的缺点是需要大量的尝试来获取数据。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-4">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">模仿学习 (Imitation Learning)</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">尽量减少数据的使用量, 旨在通过收集高质量的演示来最小化数据使用。《模仿学习简洁教程》 - 南京大学 LAMDA: <a href="https://www.lamda.nju.edu.cn/xut/Imitation_Learning.pdf" class="text-primary-600 dark:text-primary-400 hover:underline" target="_blank">PDF</a></p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm mb-4">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">迁移学习 (Transfer Learning)</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">既然在真实环境不行，而仿真环境可以，那么先在仿真环境中训练，再把知识迁移到真实机器人上。这点和下一节Sim2Real 是一样的。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 4.4 仿真到现实 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">4.4 Sim2Real - 仿真到现实</h3>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">Sim2Real (Simulation to Reality)</p>
+                                <p class="text-gray-700 dark:text-gray-300 mt-2">
+                                    Sim2Real 指的是一种<strong>将在模拟环境中训练的人工智能模型（通常是控制策略）迁移到真实物理机器人上，并使其能够在真实世界中有效执行任务</strong>的方法论和技术集合。
+                                </p>
+                            </div>
+                            
+                            <p class="mb-4">通过在模拟环境中进行广泛的学习，然后迁移到现实世界设置，以减少对广泛且昂贵的真实世界演示数据的需求。</p>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_13.png" alt="仿真到现实" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">Real2Sim2real</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">通过在"数字孪生"模拟环境中利用强化学习（RL）增强了真实世界场景中的模仿学习。该方法涉及在模拟中通过广泛的 RL 加强策略，然后将这些策略转移到真实世界以解决数据稀缺问题，并实现有效的机器人操作模仿学习。最初，使用 NeRF 和 VR 进行场景扫描和重建，并将构建的场景资产导入模拟器以实现真实到模拟的保真度。随后，在模拟中进行 RL 以微调从真实世界收集的稀疏专家演示得出的初始策略。最后，将经过改进的策略转移到真实世界设置中。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">TRANSIC</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">通过实时人类干预来纠正真实世界场景中的机器人行为，缩小了仿真到现实的差距。它通过几个步骤增强了仿真到现实的转移性能：首先，机器人在模拟环境中使用 RL 训练以建立基础策略。然后，这些策略在真实机器人上实施，人类通过远程控制实时干预和纠正错误行为。从这些干预中收集的数据用于训练残差策略。整合基础和残差策略确保了在仿真到现实转移后，真实世界应用中的轨迹更平滑。这种方法显著减少了对真实世界数据收集的需求，从而减轻了负担，同时实现了有效的仿真到现实转移。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">Domain Randomization</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">通过在模拟期间引入参数随机化，增强了在模拟环境中训练的模型对真实世界场景的泛化，涵盖了可能在真实世界设置中发生的条件。这种方法提高了训练模型的鲁棒性，使其能够从模拟环境部署到真实环境。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">System Identification</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">构建了真实世界环境中物理场景的准确数学模型，包括动态和视觉渲染等参数。它的目标是使模拟环境与真实世界设置非常相似，从而促进在模拟中训练的模型顺利过渡到真实环境。</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                    <h4 class="font-medium text-primary-600 dark:text-primary-400 mb-2">Lang4sim2real</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">使用自然语言作为桥接，通过使用图像的文本描述作为跨域统一信号来解决仿真到现实的差距。这种方法有助于学习领域不变的图像表示，从而提高跨模拟和真实环境的泛化性能。最初，一个编码器在带有跨域语言描述的图像数据上进行预训练。随后，使用领域不变表示，训练了一个多领域、多任务的语言条件行为克隆策略。这种方法通过从丰富的模拟数据中获取额外信息来补偿真实世界数据的稀缺性，从而增强了仿真到现实转移。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 4.5 世界模型 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">4.5 World Model - 世界模型</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    以物体的角度理解这个世界,及其<strong>可能的互动方式</strong>来理解世界是一种重要的认知能力，特别是在机器人操作中，许多任务需要机器人与物体进行交互。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    仿真到现实涉及创建与现实世界环境非常相似的模拟世界模型，帮助算法在转移时更好地泛化。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    世界模型方法旨在构建一个端到端的模型，通过生成或预测的方式，将视觉映射到动作，甚至任何输入到任何输出，以做出决策。
+                                </p>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_14.png" alt="世界模型" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>Stefano Ferraro et. al., FOCUS: Object-Centric World Models for Robotics Manipulation, 2023</p>
+                                <p>Haoyu Zhen et. al., 3D-VLA: A 3D Vision-Language-Action Generative World Model, 2024</p>
+                                <p>Dominik Schmidt et. al., LEARNING TO ACT WITHOUT ACTIONS, 2024</p>
+                                <p>3D VLA: 输入点云与动作，输出预测的下一步点云</p>
+                                <p>LAPO: 在图像层面, 预测主体在不断移动周围环境会如何变化</p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">三种世界模型:</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">基于生成的方法</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">随着模型规模和数据的逐步增加，生成模型已经展示了理解和生成符合物理定律的图像、视频、点云或其他格式数据的能力。这表明生成模型能够学习并内化世界知识。具体来说，经过大量数据的暴露后，生成模型不仅能捕捉数据的统计特性，还能通过其内在结构和机制模拟真实世界的物理和因果关系。</p>
+                                    </div>
+                                    
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">基于预测的方法</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">基于预测的世界模型通过构建和利用内部表示来预测和理解环境。通过根据给定条件在潜在空间重建相应的特征，它捕获了更深层次的语义和相关的世界知识。这个模型将输入信息映射到潜在空间，并在该空间内操作，提取和利用高级语义信息，从而使机器人能够更准确地感知世界环境的基本表示并更准确地执行具身下游任务。</p>
+                                    </div>
+                                    
+                                    <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm card-hover">
+                                        <h5 class="font-medium text-primary-600 dark:text-primary-400 mb-3">知识驱动的方法</h5>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">知识驱动的世界模型将人工构建的知识注入模型中，赋予它们世界知识。这种方法在具身人工智能领域显示出广泛的应用潜力。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    <span class="font-semibold text-red-600 dark:text-red-400">这类世界模型与VLA模型的最大区别在于:</span><br/>
+                                    VLA模型是在大规模互联网数据集上训练以获得高水平的紧急能力，然后与现实世界的机器人数据共同微调。<br/>
+                                    世界模型是从物理世界数据从头开始训练的，随着数据量的增加逐渐发展出高级能力。
+                                </p>
+                                <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                    然而，它们仍然是低级的物理世界模型，有点像人类神经反射系统的工作机制。这使它们更适合于输入和输出相对结构化的场景，如自动驾驶（输入：视觉，输出：油门、刹车、方向盘）或物体排序（输入：视觉、指令、数值传感器，输出：抓取目标物体并将其放置在目标位置）。它们不太适合于泛化到结构化、复杂的具身任务。<br/>
+                                    在物理模拟领域，学习世界模型是有希望的。与传统的模拟方法相比，它提供了显著的优势，例如能够在不完整信息下推理交互、满足实时计算需求，并随着时间的推移提高预测准确性。这种世界模型的预测能力至关重要，它使机器人能够发展出在人类世界中操作所需的物理直觉。
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 5. 具身智能系统架构 -->
+                    <section id="embodied-ai-architecture" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">5. 具身智能系统架构</h2>
+                        
+                        <div class="my-6">
+                            <img src="attachments/具身智能 Embodied AI_image_15.png" alt="具身智能系统架构" class="rounded-lg shadow-md img-zoom mx-auto">
+                        </div>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200">
+                                这张图展示了一个复杂的具身智能（Embodied AI）系统架构，其核心目标是让机器人能够像人一样在真实物理世界中感知、理解、决策并执行任务。
+                            </p>
+                        </div>
+                        
+                        <ol class="list-decimal pl-6 space-y-6 mb-8">
+                            <li>
+                                <strong class="text-primary-600 dark:text-primary-400">核心理念：具身智能 (Embodied AI)</strong>
+                                <ul class="list-disc pl-6 mt-2 space-y-1">
+                                    <li>与传统的 AI（如下棋 AI、图像识别 AI）不同，具身智能强调 AI 拥有一个"身体"（即机器人），并通过这个身体与物理世界进行实时交互来学习和适应。</li>
+                                    <li>这种交互性是关键：感知、行动和学习是紧密耦合的。</li>
+                                </ul>
+                            </li>
+                            
+                            <li>
+                                <strong class="text-primary-600 dark:text-primary-400">左侧：环境与载体 (Environments & Embodiments)</strong>
+                                <ul class="list-disc pl-6 mt-2 space-y-2">
+                                    <li>
+                                        <strong>Virtual Environment (Cyber Space)-虚拟环境（赛博空间）</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">提供了一个可控、安全、高效的训练场所。机器人可以在这里进行大量模拟训练，尝试各种行为并观察结果，而无需担心损坏真实设备或造成危险。图中的两个小图展示了模拟的室内场景。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Embodiments-具身体</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">指机器人的物理形态，如图中展示的人形机器人、四足机器人、机械臂等。不同的身体形态决定了机器人与环境交互的方式和能力。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Physical Environments-物理环境</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">机器人最终要应用的真实世界场景，如图中展示的家居、商店、养老院等。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Sim2Real (Simulation to Reality)-模拟到现实</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">这是一个关键的桥梁和挑战。将在虚拟环境中学习到的知识和技能迁移到物理机器人上，使其能够在真实世界中有效工作。</p>
+                                    </li>
+                                </ul>
+                            </li>
+                            
+                            <li>
+                                <strong class="text-primary-600 dark:text-primary-400">中部：大脑——具身世界模型 (Brain: Embodied World Model)</strong>
+                                <p class="mt-1 mb-2">这是具身智能的核心，模拟生物大脑的功能，负责处理信息、学习和决策。</p>
+                                <ul class="list-disc pl-6 mt-2 space-y-2">
+                                    <li>
+                                        <strong>Perception-感知</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">从环境中收集信息（视觉、听觉、触觉等）。对应图中的紫色模块。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Memory-记忆</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">存储过去的经验、知识和环境模型。对应图中的橙色模块。</p>
+                                    </li>
+                                    <li>
+                                        <strong>World Model-世界模型</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">对环境状态、动态以及自身行为后果的内部表征和预测。这是理解环境和规划行动的基础。对应图中的绿色模块。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Configurator-配置器</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">可能指根据任务或环境调整内部参数或模型结构。对应图中的蓝色模块。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Actor-行动器</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">根据当前感知、世界模型和目标，决定要执行的动作。对应图中的黄色模块。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Critic-评论家 (Cost-Intrinsic Cost-成本-内在成本)</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">评估行动的好坏或状态的价值，用于指导学习。</p>
+                                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                                            <li><strong>Cost-成本</strong>: 通常指与任务相关的外部奖励或惩罚。</li>
+                                            <li><strong>Intrinsic Cost-内在成本 (或内在奖励)</strong>: 由智能体内部产生，用于鼓励探索、好奇心等，即使没有外部明确的奖励信号。对应图中的红色模块。</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <strong>Execute-执行</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">机器人大脑通过行动器将决策转化为物理动作，作用于虚拟环境或物理环境。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Feedback-反馈</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">机器人执行动作后，从环境中获得反馈（如状态变化、奖励信号），用于更新世界模型和改进策略。</p>
+                                    </li>
+                                </ul>
+                            </li>
+                            
+                            <li>
+                                <strong class="text-primary-600 dark:text-primary-400">大脑与外部的交互及基础能力</strong>
+                                <ul class="list-disc pl-6 mt-2 space-y-1">
+                                    <li><strong>Interaction-交互</strong>: 大脑通过感知和行动与环境交互，这是学习的核心。</li>
+                                    <li><strong>Multi-modal Large Models-多模态大模型</strong>: 作为底层技术支撑，能够处理和融合来自不同感官（视觉、语言、声音等）的信息，赋能更高级的认知能力。</li>
+                                    <li><strong>Multi-modal Elements-多模态元素</strong>: 指原始的多模态数据输入。</li>
+                                    <li><strong>Multi-modal Active Perception-多模态主动感知</strong>: 机器人不仅仅被动接收信息，而是主动地调整传感器（如移动摄像头）以获取更有价值的信息。</li>
+                                    <li><strong>Human-Robot Interaction-人机交互</strong>: 机器人需要与人自然、有效地交互。</li>
+                                    <li><strong>Task Planning-任务规划</strong>: 将复杂任务分解为一系列可执行的子任务和动作。</li>
+                                </ul>
+                            </li>
+                            
+                            <li>
+                                <strong class="text-primary-600 dark:text-primary-400">右侧：对齐与学习目标 (Alignment & Learning Goals)</strong>
+                                <p class="mt-1 mb-2">这部分强调了具身智能系统需要学习和遵守的准则，以确保其行为安全、可靠并符合人类期望。</p>
+                                <ul class="list-disc pl-6 mt-2 space-y-2">
+                                    <li>
+                                        <strong>Align-对齐</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">智能体的行为和目标需要与人类的价值观、物理规律和因果关系对齐。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Human Value-人类价值观</strong>:
+                                        <ul class="list-disc pl-6 mt-1 space-y-1">
+                                            <li>最顶层是抽象的人类价值。</li>
+                                            <li>往下分解为领域知识 (Domain Knowledge)。</li>
+                                            <li>再具体到设施和设备 (Facility and Equipment) 的理解。</li>
+                                            <li>以及对物体 (Objects) 的认知。</li>
+                                            <li>图示了一个场景和一些与人交互的机器人，强调了以人为本。</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <strong>Physical Law-物理规律</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">机器人需要理解并遵守物理世界的规律（如重力、碰撞、物体永存性等）。图中展示了不同的室内场景和各种日常物品，机器人需要理解这些物品的物理属性和用途。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Causality Learning-因果学习</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">理解行为与其后果之间的因果关系，而不仅仅是相关性。图中例子：地上有污渍 (Dirty Floor) -> 如果有人在场 (With Person) -> 处理 (Deal) -> 安全 (Safe)-未知 (Unknown)。如果无人 (Without Person) -> 不处理 (Not-Deal) -> 不安全 (Unsafe)-未知 (Unknown)。最终目标是执行安全有效的操作。</p>
+                                    </li>
+                                    <li>
+                                        <strong>Reliable and Safe Manipulation-可靠和安全的操作</strong>:
+                                        <p class="mt-1 text-gray-700 dark:text-gray-300">这是具身智能在物理世界中执行任务的最终目标。如图中机器人做饭、辅助老人、整理衣物等，都需要高度的可靠性和安全性。</p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                        
+                        <p class="text-gray-700 dark:text-gray-300">总结来说，这张图描绘了一个具身智能系统如何通过在虚拟和物理环境中进行多模态感知和交互，构建和更新其内部的世界模型，并基于人类价值观、物理规律和因果理解来进行任务规划和决策，最终实现可靠、安全地在复杂真实世界中执行任务的目标。其中，Sim2Real、多模态大模型、因果学习以及与人类价值观的对齐是实现这一目标的关键技术和方向。</p>
+                    </section>
+
+                    <!-- 6. 数据收集 -->
+                    <section id="data-collection" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">6. Data Collection - 数据收集</h2>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200">
+                                人类用语言进行社会性交流已经达到了70000年以上，其中常规生活记忆、身体感知、感知的小技巧以及和环境交互的小技巧都融入了语言。
+                            </p>
+                            <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                但是，目前LLM掌握的知识在一些特定的"具身"领域是非常有限的，这对于语言模型理解和处理相关任务构成了显著挑战。
+                            </p>
+                        </div>
+                        
+                        <p class="mb-4">对于仿真到现实适应性，高质量数据非常重要。</p>
+                        
+                        <!-- 6.1 From Video -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">6.1 From Video</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    利用已有的视频
+                                </p>
+                            </div>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_16.png" alt="From Video" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                <p>Chen Wang et. al., MimicPlay: Long-Horizon Imitation Learning by Watching Human Play, 2023</p>
+                                <p>Vidhi Jain et. al., Vid2Robot: End-to-end Video-conditioned Policy Learning with Cross-Attention Transformers, 2023</p>
+                            </div>
+                            
+                            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    <span class="font-semibold text-red-600 dark:text-red-400">存在的问题:</span>
+                                </p>
+                                <ul class="list-disc pl-6 mt-2 space-y-1 text-gray-700 dark:text-gray-300">
+                                    <li>信息表征完全度不足</li>
+                                    <li>相对于真机信息的还原性有限</li>
+                                    <li>迁移能力较弱</li>
+                                    <li>算法后续能力提升有限</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 6.2 Hardware -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">6.2 Hardware</h3>
+                            
+                            <!-- 6.2.1 Light-weight Hardware -->
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">6.2.1 Light-weight Hardware</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        通过一个轻量级的硬件实现，实现一个硬件数据采集
+                                    </p>
+                                </div>
+                                
+                                <p class="mb-4">具体的例子就是针对末端的数据进行采集与处理:</p>
+                                
+                                <div class="my-6">
+                                    <img src="attachments/具身智能 Embodied AI_image_17.png" alt="Light-weight Hardware" class="rounded-lg shadow-md img-zoom mx-auto">
+                                </div>
+                            </div>
+                            
+                            <!-- 6.2.2 Heavy Hardware -->
+                            <div class="mb-6">
+                                <h4 class="text-lg font-medium mb-3">6.2.2 Heavy Hardware</h4>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        利用 VR 技术与双臂的主从操作，实现双臂灵巧手的方案
+                                    </p>
+                                    <p class="text-gray-800 dark:text-gray-200 mt-3">
+                                        采集信息的效率高，含量高
+                                    </p>
+                                </div>
+                                
+                                <div class="my-6">
+                                    <img src="attachments/具身智能 Embodied AI_image_18.png" alt="Heavy Hardware" class="rounded-lg shadow-md img-zoom mx-auto">
+                                </div>
+                                
+                                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        <span class="font-semibold text-red-600 dark:text-red-400">存在的问题:</span>
+                                    </p>
+                                    <ul class="list-disc pl-6 mt-2 space-y-1 text-gray-700 dark:text-gray-300">
+                                        <li>整套成本较高</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 6.3 Generative Simulation -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">6.3 Generative Simulation</h3>
+                            
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200">
+                                    硬件采集方式所采集到的数据终极是有限的，故存在另一种思路--生成仿真
+                                </p>
+                            </div>
+                            
+                            <p class="mb-4">前述的数据收集方法涉及直接在真实世界中收集演示数据以训练代理。这种收集方法通常需要大量的人力、物力资源和时间，导致效率低下。因此，在大多数情况下，研究人员可以选择在模拟环境中收集数据集进行模型训练。在模拟环境中收集数据不需要大量资源，通常可以由程序自动化，节省大量时间。</p>
+                            
+                            <div class="my-6">
+                                <img src="attachments/具身智能 Embodied AI_image_19.png" alt="Generative Simulation" class="rounded-lg shadow-md img-zoom mx-auto">
+                            </div>
+                            
+                            <p class="mb-4">RoboGen 构建闭环的自动流程: Propose-generate-learn cycle</p>
+                            
+                            <ol class="list-decimal pl-6 space-y-2 mb-6">
+                                <li>Propose 任务目标</li>
+                                <li>Generate 任务环境</li>
+                                <li>Learn 如何实现</li>
+                            </ol>
+                            
+                            <p>从而实现不同任务目标与环境的大规模数据收集, <em class="text-primary-600 dark:text-primary-400">但是可控性不足</em><br/>于是 MimicGen 选择将之前的一个小规模任务与环境扩展到更大更广的数据收集</p>
+                        </div>
+                    </section>
+
+                    <!-- 7. 现在发展的问题 -->
+                    <section id="current-issues" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">7. 现在发展的问题</h2>
+                        
+                        <div class="my-6">
+                            <img src="attachments/具身智能 Embodied AI_image_20.png" alt="现在发展的问题" class="rounded-lg shadow-md img-zoom mx-auto">
+                        </div>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                            <p class="text-gray-800 dark:text-gray-200">
+                                现在的技术路线并没有统一，现在的整体方向都在人形机器人与灵巧手之上
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- 8. 和我们相关的 -->
+                    <section id="relevant-to-us" class="mb-12">
+                        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">8. 和我们相关的</h2>
+                        
+                        <!-- 8.1 AUV的情况 -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4">8.1 AUV 的情况</h3>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mb-6 rounded-r">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                    在水下机器人（AUV）领域，data-driven（数据驱动）的方法与model-based/modular（基于模型/模块化）的方法在不同任务中的优势各异，呈现出并驾齐驱、相互融合的态势。
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- 8.1.1 传统Model-based/Modular方法的优势及其基础 -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-medium mb-3">8.1.1 传统Model-based/Modular方法的优势及其基础</h4>
+                            
+                            <ol class="list-decimal pl-6 space-y-2 mb-6">
+                                <li><strong>相对成熟的运动模型与驱动机制：</strong> 对于许多经典构型的AUV（如鱼雷型AUV），其水动力学模型在特定条件下（如开阔水域、稳定流场）已有较深入的研究和相对成熟的数学描述。其驱动机构（如螺旋桨推进器、舵面控制）也较为经典，控制原理清晰。</li>
+                                <li><strong>明确的作业模式与有限交互：</strong> 传统的AUV任务，如大范围海底地形测绘、海洋环境参数调查等，通常在远离障碍物的开阔水域执行预设路径，与环境的物理交互较少或模式固定（如定高循迹）。</li>
+                                <li><strong>工程实践的长期积累：</strong> 基于模型、优化理论和分层控制架构（如导航-制导-控制分层）的方法，在AUV领域有数十年的发展和应用。通过精心的任务规划、鲁棒的控制器设计和可靠的故障处理机制，这些传统方法在特定场景下能够保证AUV的稳定运行和任务完成。</li>
+                            </ol>
+                        </div>
+                        
+                        <!-- 8.1.2 Data-driven/端到端方法展现优势的驱动因素与场景 -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-medium mb-3">8.1.2 Data-driven/端到端方法展现优势的驱动因素与场景 （AUV的难点）</h4>
+                            
+                            <p class="mb-4">然而，水下环境的极端复杂性和不可预测性给AUV带来了远超于空中的挑战，这正是data-driven方法大放异彩的契机：</p>
+                            
+                            <ol class="list-decimal pl-6 space-y-4 mb-6">
+                                <li>
+                                    <strong>极端困难的状态估计与导航：</strong>
+                                    <ul class="list-disc pl-6 mt-2 space-y-1">
+                                        <li><strong>GPS失效：</strong> GPS信号无法穿透水体，AUV的定位导航严重依赖惯性导航系统（INS）、多普勒计程仪（DVL）、声学定位系统（LBL/USBL）和地形匹配/同步定位与建图（SLAM）等。这些传感器组合本身会产生累积误差。</li>
+                                        <li><strong>声学系统局限：</strong> 声学定位和通信手段是水下的主流，但其带宽低、时延大、易受水声信道（如温度、盐度、深度变化导致声速剖面变化，多径效应）和环境噪声干扰，导致定位精度和通信可靠性大幅下降。精确建模这些复杂的声学误差和干扰极为困难。</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>恶劣且信息匮乏的感知环境：</strong>
+                                    <ul class="list-disc pl-6 mt-2 space-y-1">
+                                        <li><strong>光学受限：</strong> 光在水下衰减迅速，尤其在浑浊水体中，光学传感器（摄像头）的有效距离极短。</li>
+                                        <li><strong>声学主导但充满挑战：</strong> 声呐（前视声呐、侧扫声呐、多波束测深仪等）是水下感知的主要手段，但其数据通常稀疏、噪声大、分辨率相对较低，且易受海底地貌、沉积物特性、海洋生物等多种因素影响，产生大量伪影和不确定性。从这些数据中进行环境理解、目标识别或障碍物规避对传统算法是巨大挑战。</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>复杂多变的水动力学与环境扰动：</strong>
+                                    <ul class="list-disc pl-6 mt-2 space-y-1">
+                                        <li><strong>模型不确定性高：</strong> AUV的水动力学模型比无人机复杂得多，受到流体密度、粘度、附连水质量、以及未知的洋流、内波、湍流、海底边界效应等多种因素影响，这些因素通常难以精确在线测量和建模。</li>
+                                        <li><strong>近距离作业风险：</strong> 在近底作业、结构物检查、狭窄或未知空间内航行时，AUV与环境的流体动力学耦合效应更为显著和动态变化，传统模型难以准确描述，碰撞风险高。</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>与未知环境的交互需求增加：</strong> 随着AUV任务向更复杂领域拓展（如水下考古、生物采样、管线维护、水下对接、协同作业），AUV需要具备更强的环境适应能力和自主决策能力，以应对未知的、动态变化的环境和交互对象。
+                                </li>
+                            </ol>
+                            
+                            <p>因此，在如复杂水下环境中的自主导航与避障（尤其是在GPS拒止、声学环境恶劣的条件下）、海底精细测绘与目标智能识别、与未知动态环境的交互（如水下抓取、自主坞站对接）、以及应对强时变流场干扰下的鲁棒控制等任务中，data-driven方法，特别是基于深度学习的端到端或模块化学习方法，通过从大量真实或仿真数据中学习环境特征、噪声模式、动力学特性和控制策略，展现出在处理高度不确定性、强噪声、复杂非线性和高维感知数据方面的显著优势。这些方法能够有效弥补传统模型在精度和适应性上的不足，有时能实现传统方法难以企及的性能和鲁棒性，推动AUV向更高自主性和更复杂任务能力发展。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 页面底部 -->
+        <footer class="bg-white dark:bg-gray-800 shadow-md mt-12 py-8">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-6 md:mb-0">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-robot text-blue-600 text-2xl mr-2"></i>
+                            <span class="text-xl font-bold">具身智能 Embodied AI</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400">全面解析人工智能前沿技术</p>
+                    </div>
+                    <div class="flex flex-col items-center md:items-end">
+                        <div class="flex items-center space-x-4 mb-3">
+                            <a href="https://github.com/youzyangHEU" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-github text-2xl"></i>
+                                <span class="ml-2">GitHub</span>
+                            </a>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">哈尔滨工程大学</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">智能海洋航行器技术全国重点实验室</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 text-center text-gray-600 dark:text-gray-400">
+                    <p class="mb-2">© 2025 游子昂, 哈尔滨工程大学智能海洋航行器技术全国重点实验室</p>
+                    <p class="text-sm">National Key Laboratory of Autonomous Marine Vehicle Technology</p>
+                </div>
+            </div>
+        </footer>
+        
+        <!-- 返回顶部按钮 -->
+        <button id="back-to-top" class="fixed bottom-6 right-6 p-3 rounded-full bg-primary-600 dark:bg-primary-500 text-white shadow-lg opacity-0 transition-opacity duration-300 hover:bg-primary-700 dark:hover:bg-primary-600" aria-label="返回顶部">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <!-- 移动端目录抽屉 -->
+    <div id="mobile-toc" class="fixed inset-0 z-50 lg:hidden hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="mobile-toc-backdrop"></div>
+        <div class="absolute right-0 top-0 h-full w-3/4 max-w-xs bg-white dark:bg-gray-800 p-4 overflow-y-auto transform transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">目录</h3>
+                <button id="close-mobile-toc" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="mobile-toc-content" class="space-y-2">
+                <!-- 移动端目录内容将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Preline UI JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/preline/dist/preline.min.js"></script>
+    
+    <!-- 自定义JavaScript -->
+    <script>
+        // 主题切换
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        
+        // 检查本地存储中的主题或系统偏好
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (savedTheme === 'dark') {
+            htmlElement.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            const currentTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', currentTheme);
+        });
+        
+        // 目录切换
+        const tocToggle = document.getElementById('toggle-toc');
+        const toc = document.getElementById('toc');
+        
+        // 初始化桌面视图下的目录显示
+        const initTocDisplay = () => {
+            if (window.innerWidth >= 1024) { // lg breakpoint
+                toc.classList.remove('hidden');
+                toc.classList.add('lg:block');
+                if (toc.classList.contains('fixed')) {
+                    toc.classList.remove('fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto');
+                    toc.classList.add('sticky', 'top-24', 'lg:w-1/4', 'xl:w-1/5');
+                }
+            } else {
+                if (!toc.classList.contains('fixed')) {
+                    toc.classList.add('hidden');
+                }
+            }
+        };
+        
+        // 初始化目录显示
+        initTocDisplay();
+        
+        // 窗口大小改变时更新目录显示
+        window.addEventListener('resize', initTocDisplay);
+        
+        tocToggle.addEventListener('click', () => {
+            const isHidden = toc.classList.contains('hidden');
+            
+            if (isHidden) {
+                if (window.innerWidth < 1024) {
+                    toc.classList.remove('hidden');
+                    toc.classList.add('block', 'animate-fade-in');
+                    toc.classList.add('fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto', 'z-40', 'bg-white', 'dark:bg-gray-800', 'p-4', 'shadow-lg');
+                }
+            } else {
+                if (window.innerWidth < 1024) {
+                    toc.classList.add('hidden');
+                    toc.classList.remove('block', 'fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto', 'animate-fade-in');
+                } else {
+                    // 在桌面视图下点击时，不隐藏侧边栏目录
+                    return;
+                }
+            }
+            
+            // 点击目录外的区域关闭目录（仅在移动视图）
+            if (isHidden && window.innerWidth < 1024) {
+                const handleClickOutside = (e) => {
+                    if (!toc.contains(e.target) && e.target !== tocToggle) {
+                        toc.classList.add('hidden');
+                        toc.classList.remove('block', 'fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto', 'animate-fade-in');
+                        document.removeEventListener('click', handleClickOutside);
+                    }
+                };
+                
+                setTimeout(() => {
+                    document.addEventListener('click', handleClickOutside);
+                }, 0);
+            }
+        });
+        
+        // 关闭目录按钮
+        const closeTocBtn = document.getElementById('close-toc');
+        if (closeTocBtn) {
+            closeTocBtn.addEventListener('click', () => {
+                toc.classList.add('hidden');
+                toc.classList.remove('block', 'fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto', 'animate-fade-in');
+            });
+        }
+        
+        // 动态生成目录
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocContent = document.getElementById('toc-content');
+            const content = document.getElementById('content');
+            const headings = content.querySelectorAll('h2, h3');
+            
+            let tocHTML = '';
+            let prevLevel = 0;
+            
+            headings.forEach(heading => {
+                const level = parseInt(heading.tagName.substring(1));
+                const title = heading.textContent;
+                const id = heading.id || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+                
+                heading.id = id;
+                
+                if (level > prevLevel) {
+                    tocHTML += '<ul class="pl-4 mt-1 space-y-1">';
+                } else if (level < prevLevel) {
+                    for (let i = 0; i < prevLevel - level; i++) {
+                        tocHTML += '</ul>';
+                    }
+                }
+                
+                let linkClass = 'block py-1 px-2 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors';
+                if (level === 2) {
+                    linkClass += ' font-medium';
+                } else {
+                    linkClass += ' text-sm';
+                }
+                
+                tocHTML += `<li><a href="#${id}" class="${linkClass}">${title}</a></li>`;
+                
+                prevLevel = level;
+            });
+            
+            for (let i = 0; i < prevLevel - 2; i++) {
+                tocHTML += '</ul>';
+            }
+            
+            tocContent.innerHTML = tocHTML;
+            
+            // 目录点击平滑滚动
+            tocContent.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    
+                    if (targetElement) {
+                        // 移动设备上关闭目录
+                        if (window.innerWidth < 1024) {
+                            toc.classList.add('hidden');
+                            toc.classList.remove('block', 'fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto', 'animate-fade-in');
+                        }
+                        
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        
+                        // 高亮显示当前阅读的部分
+                        targetElement.classList.add('bg-yellow-50', 'dark:bg-yellow-900/10');
+                        setTimeout(() => {
+                            targetElement.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/10');
+                        }, 2000);
+                    }
+                });
+            });
+            
+            // 滚动时更新目录高亮
+            const updateActiveTocLink = () => {
+                const scrollPosition = window.scrollY;
+                
+                headings.forEach(heading => {
+                    const id = heading.id;
+                    const offset = heading.offsetTop - 100;
+                    const height = heading.offsetHeight;
+                    
+                    if (scrollPosition >= offset && scrollPosition < offset + height) {
+                        tocContent.querySelectorAll('a').forEach(link => {
+                            link.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-primary-600', 'dark:text-primary-400');
+                            
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-primary-600', 'dark:text-primary-400');
+                            }
+                        });
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', updateActiveTocLink);
+            updateActiveTocLink();
+        });
+        
+        // 图片点击放大
+        document.querySelectorAll('.img-zoom').forEach(img => {
+            img.addEventListener('click', function() {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
+                
+                const imgClone = this.cloneNode();
+                imgClone.className = 'max-h-[90vh] max-w-[90vw] object-contain';
+                
+                overlay.appendChild(imgClone);
+                document.body.appendChild(overlay);
+                
+                overlay.addEventListener('click', function() {
+                    document.body.removeChild(overlay);
+                });
+            });
+        });
+        
+        // 返回顶部按钮
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.style.opacity = '1';
+            } else {
+                backToTopButton.style.opacity = '0';
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 代码块语法高亮
+        document.querySelectorAll('pre').forEach(block => {
+            if (!block.classList.contains('prismjs')) {
+                block.classList.add('language-text');
+                // 添加复制按钮
+                const copyButton = document.createElement('button');
+                copyButton.className = 'absolute top-2 right-2 p-1 rounded text-xs bg-gray-700 text-white hover:bg-gray-600 transition-colors';
+                copyButton.textContent = '复制';
+                
+                copyButton.addEventListener('click', () => {
+                    const code = block.textContent;
+                    navigator.clipboard.writeText(code).then(() => {
+                        copyButton.textContent = '已复制!';
+                        setTimeout(() => {
+                            copyButton.textContent = '复制';
+                        }, 2000);
+                    });
+                });
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative';
+                block.parentNode.insertBefore(wrapper, block);
+                wrapper.appendChild(block);
+                wrapper.appendChild(copyButton);
+            }
+        });
+        
+        // 响应式调整
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                if (toc.classList.contains('fixed')) {
+                    toc.classList.remove('fixed', 'top-16', 'left-0', 'w-full', 'h-auto', 'max-h-[70vh]', 'overflow-y-auto');
+                    toc.classList.add('sticky', 'top-24', 'lg:w-1/4', 'xl:w-1/5');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

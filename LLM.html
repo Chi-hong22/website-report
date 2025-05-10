@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型 LLM - 全面解析</title>
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Preline UI -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline/dist/preline.min.css" />
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 卡片悬停效果 */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* 代码块样式 */
+        pre {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .dark pre {
+            background-color: #1e293b;
+        }
+        
+        /* 引用块样式 */
+        blockquote {
+            border-left: 4px solid #0ea5e9;
+            padding-left: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-brain text-primary-600 text-2xl"></i>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">大模型 LLM</h1>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#intro" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">概述</a>
+                    <a href="#types" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">类型</a>
+                    <a href="#concepts" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">基础概念</a>
+                    <a href="#applications" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">应用</a>
+                    <a href="#resources" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">资源</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- 深色模式切换 -->
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                    </button>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 移动端菜单 -->
+            <div id="mobile-menu" class="md:hidden hidden pb-4">
+                <div class="flex flex-col space-y-3">
+                    <a href="#intro" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">概述</a>
+                    <a href="#types" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">类型</a>
+                    <a href="#concepts" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">基础概念</a>
+                    <a href="#applications" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">应用</a>
+                    <a href="#resources" class="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 font-medium">资源</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <!-- 主横幅 -->
+        <section class="bg-gradient-to-r from-primary-600 to-blue-700 text-white rounded-2xl p-8 mb-12">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl sm:text-5xl font-bold mb-4">大模型 LLM</h1>
+                <p class="text-xl opacity-90">探索人工智能前沿技术与应用</p>
+                <div class="mt-8 flex flex-wrap justify-center gap-4">
+                    <a href="#intro" class="bg-white text-primary-700 hover:bg-gray-100 px-6 py-3 rounded-lg font-medium transition">开始探索</a>
+                    <a href="#resources" class="bg-transparent border border-white hover:bg-white/10 px-6 py-3 rounded-lg font-medium transition">查看资源</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 更新时间信息 -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-12 flex items-center">
+            <i class="fas fa-clock text-blue-500 mr-3"></i>
+            <p class="text-blue-800 dark:text-blue-300 font-medium">更新时间: 2025年5月8日</p>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- 侧边导航 - 仅在大屏幕显示 -->
+            <div class="hidden lg:block">
+                <div class="sticky top-24 bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">目录</h3>
+                    <nav class="space-y-2">
+                        <div>
+                            <a href="#intro" class="block text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 py-1 font-medium">1. LLM--AGI & AIGC</a>
+                            <div class="pl-4 space-y-1 mt-1">
+                                <a href="#llm-history" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">1.1 LLM历史</a>
+                                <a href="#nlp-early" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">1.2 NLP的早期探索</a>
+                                <a href="#deep-learning" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">1.3 深度学习的崛起</a>
+                                <a href="#pretrain-finetune" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">1.4 预训练与微调范式</a>
+                                <a href="#generative-ai" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">1.5 生成式AI</a>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <a href="#types" class="block text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 py-1 font-medium">2. LLM种类</a>
+                            <div class="pl-4 space-y-1 mt-1">
+                                <a href="#types" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">2.1 框架</a>
+                                <div class="pl-3 space-y-1">
+                                    <a href="#types" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">2.1.1 Dense Transformer 架构</a>
+                                    <a href="#types" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">2.1.2 MoE 架构</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <a href="#concepts" class="block text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 py-1 font-medium">3. LLM基础概念</a>
+                            <div class="pl-4 space-y-1 mt-1">
+                                <a href="#prompt" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.1 Prompt</a>
+                                <a href="#temperature" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.2 Temperature</a>
+                                <a href="#cot" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.3 思维链（Chain-of-Thought, CoT）</a>
+                                <a href="#training-methods" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.4 LLM 基本训练方法</a>
+                                <a href="#pretraining" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.5 预训练（Pretraining）</a>
+                                <a href="#post-training" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.6 后训练（Post-training）</a>
+                                <a href="#reinforcement-learning" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">3.7 强化学习（Reinforcement Learning, RL）</a>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <a href="#applications" class="block text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 py-1 font-medium">4. LLM应用</a>
+                            <div class="pl-4 space-y-1 mt-1">
+                                <a href="#api-calling" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">4.1 API 调用</a>
+                                <div class="pl-3 space-y-1">
+                                    <a href="#api-platforms" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.1 API 提供平台</a>
+                                    <a href="#agent-products" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.3 Agent 产品</a>
+                                    <a href="#code-tools" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.4 AI 代码开发工具</a>
+                                    <a href="#desktop-tools" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.5 桌面工具</a>
+                                    <a href="#search-engines" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.6 AI 搜索引擎</a>
+                                    <a href="#doc-tools" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-xs">4.1.7 文档处理工具</a>
+                                </div>
+                                <a href="#rag" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">4.2 RAG</a>
+                                <a href="#agent" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">4.3 Agent</a>
+                                <a href="#mcp" class="block text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 py-1 text-sm">4.4 MCP(大模型上下文协议)</a>
+                            </div>
+                        </div>
+                        
+                        <a href="#resources" class="block text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 py-1 font-medium">5. 资源</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主要内容 -->
+            <div class="lg:col-span-3 space-y-12">
+                <!-- 第一部分: LLM--AGI & AIGC -->
+                <section id="intro" class="fade-in">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">1. LLM--AGI & AIGC</h2>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+                        <p class="text-blue-800 dark:text-blue-300">
+                            <strong>要点:</strong> AGI 是人工智能的终极愿景，追求构建具备人类智慧的通用系统。AIGC 是当前人工智能的具体应用形式，突出在内容生成领域的创新与效率提升。两者的主要联系在于技术的共性与互相推动关系：AIGC 为 AGI 的发展提供技术支撑与实验验证，而 AGI 的实现会进一步提升 AIGC 的能力与潜力。
+                        </p>
+                    </div>
+                    
+                    <div class="prose prose-lg max-w-none dark:prose-invert">
+                        <p>⼤语⾔模型（LLM，Large Language Model），也称⼤型语⾔模型，是⼀种旨在理解和⽣成⼈类语⾔的⼈⼯智能模型。LLM 通常指包含数千亿（765B）参数的语⾔模型，它们在海量的⽂本数据上进⾏训练，从⽽获得对语⾔深层次的理解。</p>
+                        
+                        <p>⽬前，国外的知名 LLM 有 GPT-3.5、GPT-4、PaLM、Claude 和 LLaMA 等，国内的有深度求索、通义千问、智谱清言等。</p>
+                        
+                        <p>为了探索性能的极限，许多研究⼈员开始训练越来越庞⼤的语⾔模型。尽管这些⼤型语⾔模型与⼩型语⾔模型（例如 3.3 亿参数的 BERT 和 15 亿参数的 GPT-2 ）使⽤相似的架构和预训练任务，但它们展现出截然不同的能⼒，尤其在解决复杂任务时表现出了惊⼈的潜⼒，这被称为"涌现能⼒"。以 GPT-3 和 GPT-2 为例，GPT-3 可以通过学习上下⽂来解决少样本任务，⽽ GPT-2 在这⽅⾯表现较差。</p>
+                        
+                        <p>因此，科研界给这些庞⼤的语⾔模型起了个名字，称之为"⼤语⾔模型（LLM）"。LLM的一个显著应用是ChatGPT，它实现了面向对话的GPT系列模型的适应。这个对话代理通过结合监督微调和从人类反馈中学习的强化学习（RLHF）的创新训练方法，在人机交互中达到了前所未有的流畅度。</p>
+                    </div>
+                    
+                    <div class="mt-8 space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="llm-history" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">1.1 LLM历史</h3>
+                                <p class="text-gray-600 dark:text-gray-300">早期的统计方法，如N-gram模型依赖局部上下文，无法捕捉长程依赖。为解决长距离依赖问题，循环神经网络（RNN）被提出，但RNN面临梯度消失问题。随后，基于Transformer架构的大规模预训练模型（如BERT、GPT）依靠自注意力机制，成为新一代语言模型的基础，并推动了大语言模型（LLM）的发展。LLM通过自注意力机制和大规模预训练实现了上下文理解和多任务泛化能力。</p>
+                                
+                                <div class="mt-4">
+                                    <img src="attachments/大模型 LLM_image_1.png" alt="LLM历史" class="rounded-lg w-full">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="nlp-early" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">1.2 NLP 的早期探索</h3>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>20 世纪 50 年代：NLP 研究起步，尝试通过规则和统计方法解析文本。</li>
+                                    <li>规则和模板硬编码：手动编写规则处理简单任务，但灵活性差、扩展性低。</li>
+                                    <li>统计语言模型：如 n-gram 模型、隐马尔可夫模型（HMM），通过统计词频和词序预测语言。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="deep-learning" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">1.3 深度学习的崛起</h3>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>词嵌入技术：Word2Vec、GloVe 将词映射到低维向量空间，捕捉语义关系。</li>
+                                    <li>循环神经网络（RNN）：处理序列数据，捕捉长距离依赖，LSTM、GRU 提升性能。</li>
+                                    <li>Transformer 架构：2017 年提出，通过自注意力机制高效处理长距离依赖，成为 LLM 的核心。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="pretrain-finetune" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">1.4 预训练与微调范式</h3>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>BERT：双向编码器，通过掩码语言模型（MLM）学习上下文表示。</li>
+                                    <li>GPT 系列：自回归解码器，通过预测下一个词学习语言生成。</li>
+                                    <li>预训练+微调：先在大规模数据上预训练，再在特定任务上微调，显著提升性能。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="generative-ai" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">1.5 生成式AI</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">使用生成式模型生成各类数据（语言、语音、图片、视频等）</p>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>Attention：数据依存关系建模</li>
+                                    <li>Transformer：数据生成的统一架构</li>
+                                    <li>Scaling Laws：数据学习、生成的扩展法则</li>
+                                    <li>RLHF：生成与人类价值对齐的数据</li>
+                                    <li>o1/R1：生成式求解问题——生成问题求解的过程和答案（推理）</li>
+                                </ul>
+                                
+                                <div class="mt-4">
+                                    <img src="attachments/大模型 LLM_image_2.png" alt="生成式AI" class="rounded-lg w-full">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 第二部分: LLM种类 -->
+                <section id="types" class="fade-in">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">2. LLM种类</h2>
+                    
+                    <div class="mt-6">
+                        <img src="attachments/大模型 LLM_image_3.png" alt="LLM种类" class="rounded-lg w-full mb-6">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover-card">
+                            <div class="flex items-center mb-4">
+                                <div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+                                    <i class="fas fa-language text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 text-xl font-semibold text-gray-900 dark:text-white">语言大模型 (NLP)</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">在自然语言处理领域的大模型，通常用于处理文本数据和理解自然语言。这类大模型在大规模语料库上进行了训练，以学习自然语言的各种语法、语义和语境规则。</p>
+                            <div class="mt-4">
+                                <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">GPT 系列</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">Bard</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">文心一言</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover-card">
+                            <div class="flex items-center mb-4">
+                                <div class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300">
+                                    <i class="fas fa-image text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 text-xl font-semibold text-gray-900 dark:text-white">视觉大模型 (CV)</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">在计算机视觉领域使用的大模型，通常用于图像处理和分析。这类模型通过在大规模图像数据上进行训练，可以实现各种视觉任务，如图像分类、目标检测、图像分割、姿态估计、人脸识别等。</p>
+                            <div class="mt-4">
+                                <span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">VIT 系列</span>
+                                <span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">文心 UFO</span>
+                                <span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">华为盘古 CV</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover-card">
+                            <div class="flex items-center mb-4">
+                                <div class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300">
+                                    <i class="fas fa-cubes text-xl"></i>
+                                </div>
+                                <h3 class="ml-3 text-xl font-semibold text-gray-900 dark:text-white">多模态大模型</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">能够处理多种不同类型数据的大模型，例如文本、图像、音频等多模态数据。这类模型结合了 NLP 和 CV 的能力，以实现对多模态信息的综合理解和分析，从而能够更全面地理解和处理复杂的数据。</p>
+                            <div class="mt-4">
+                                <span class="inline-block bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">DALL-E</span>
+                                <span class="inline-block bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">悟空画画</span>
+                                <span class="inline-block bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full px-3 py-1 text-sm font-medium mr-2 mb-2">Midjourney</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8">
+                        <p class="text-blue-800 dark:text-blue-300">
+                            <strong>要点:</strong> 从框架角度看，LLM主要分为Dense架构和MoE架构两种重要类型。Dense架构是LLM的基础，结构简单，性能稳定，但计算资源需求高。MoE架构通过引入专家机制，实现了参数量和计算量的解耦，提高了计算效率和模型扩展能力，尤其适合处理大规模数据和复杂任务。
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="llm-frameworks" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">2.1 框架</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">从大型语言模型（LLM）框架的角度来看，可以将LLM主要分为以下几种类型，其中MoE和Dense是两种重要的架构类型：</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <h4 id="dense-transformer" class="font-semibold text-lg mb-2 text-gray-900 dark:text-white">2.1.1 Dense Transformer 架构</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>核心特点：</strong>这是最早被广泛应用于大型语言模型的经典架构。它采用全连接的方式构建每一层的参数，意味着每个神经元都能接收到前一层所有神经元的输出。</p>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>原理：</strong>基于原始的Transformer架构，包含编码器-解码器层的基本结构。通过增加模型规模（参数量），可以直接提升输出质量，这种关系相对线性和可预测。</p>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>优势：</strong></p>
+                                        <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li>结构简单直观。</li>
+                                            <li>模型质量可预期，通过增加参数量可直接提升性能。</li>
+                                            <li>架构成熟可靠，有大量的实践经验可参考。</li>
+                                        </ul>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2"><strong>局限性：</strong>参数密集，计算资源需求高，尤其在处理大规模数据集和复杂任务时，计算开销急剧增加。由于多头注意力机制的二次方复杂度，扩展计算成本较高。</p>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <h4 id="moe-architecture" class="font-semibold text-lg mb-2 text-gray-900 dark:text-white">2.1.2 MoE (Mixture of Experts) 架构</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>核心特点：</strong>MoE是一种创新的Transformer架构变体，旨在通过引入"专家"机制来优化资源利用，降低计算开销。与Dense架构不同，MoE模型不采用全连接方式，而是将每个神经元分配给不同的"专家"，并根据输入数据特点选择性激活部分专家。</p>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>原理：</strong>将一个大型网络分解为多个小型、专门化的子网络（即专家），并通过一个门控网络（Router）决定哪些专家应该被激活来处理特定的输入。门控网络根据输入特征为不同专家分配权重，实际操作中通常选择概率最高的Top-k个专家进行计算。</p>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2"><strong>优势：</strong></p>
+                                        <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li>可以在远少于Dense模型所需的计算资源下进行有效预训练，相同计算预算下可显著扩大模型或数据集规模。</li>
+                                            <li>训练速度更快，效果更好。</li>
+                                            <li>相同参数量下，推理成本低，推理速度更快。</li>
+                                            <li>扩展能力强，允许模型在保持计算成本不变的情况下增加参数数量，可扩展到非常大的模型规模。</li>
+                                            <li>多任务学习能力强。</li>
+                                        </ul>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2"><strong>局限性：</strong>专家选择依赖于输入数据特征，如果路由机制设计不当，可能导致某些专家未能被充分激活，影响整体性能。如何从现有LLM的FFNs中有效地构建专家以及如何在可接受的计算成本下提高MoE模型性能是主要挑战。</p>
+                                        
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-2"><strong>发展：</strong>MoE思想起源于1991年。2017年Google将其应用于LSTM。进入Transformer时代后，Google在2020年将MoE应用于encoder-decoder结构的Transformer模型（GShard）。2021年，Google推出Switch Transformer，进一步简化了路由策略，训练了1.6万亿参数的MoE模型。除了Google，国内的DeepSeek团队也开源了MoE大模型DeepSeekMoE(V2)。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 第三部分: LLM基础概念 -->
+                <section id="concepts" class="fade-in">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">3. LLM基础概念</h2>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="prompt" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.1 Prompt</h3>
+                                <p class="text-gray-600 dark:text-gray-300">Prompt 最初是 NLP（⾃然语⾔处理）研究者为下游任务设计出来的⼀种任务专属的输⼊模板，类似于⼀种任务（例如：分类，聚类等）会对应⼀种 Prompt。在 ChatGPT 推出并获得⼤量应⽤之后，Prompt 开始被推⼴为给⼤模型的所有输⼊。即，我们每⼀次访问⼤模型的输⼊为⼀个 Prompt，⽽⼤模型给我们的返回结果则被称为 Completion。</p>
+                                
+                                <div class="mt-4 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                    <p class="text-gray-600 dark:text-gray-300 font-medium">在使⽤LLM API 时，可以设置两种 Prompt：</p>
+                                    <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 mt-2 space-y-2">
+                                        <li><strong>SystemPrompt:</strong> 该种 Prompt 内容会在整个会话过程中持久地影响模型的回复，且相⽐于普通 Prompt 具有更⾼的重要性</li>
+                                        <li><strong>User Prompt:</strong> 这更偏向于我们平时提到的 Prompt，即需要模型做出回复的输⼊</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="temperature" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.2 Temperature</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">LLM ⽣成是具有随机性的，在模型的顶层通过选取不同预测概率的预测结果来⽣成最后的结果。我们⼀般可以通过控制 temperature 参数来控制 LLM ⽣成结果的随机性与创造性。</p>
+                                
+                                <p class="text-gray-600 dark:text-gray-300">Temperature ⼀般取值在 0~1 之间，当取值较低接近 0 时，预测的随机性会较低，产⽣更保守、可预测的⽂本，不太可能⽣成意想不到或不寻常的词。当取值较⾼接近 1 时，预测的随机性会较⾼，所有词被选择的可能性更⼤，会产⽣更有创意、多样化的⽂本，更有可能⽣成不寻常或意想不到的词。</p>
+                                
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                                        <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">低 Temperature (接近0)</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li>个人知识库助手</li>
+                                            <li>产品智能客服</li>
+                                            <li>科研论文写作</li>
+                                            <li>需要稳定性的场景</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
+                                        <h4 class="font-medium text-orange-800 dark:text-orange-300 mb-2">高 Temperature (接近1)</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li>个性化 AI</li>
+                                            <li>创意营销文案生成</li>
+                                            <li>故事创作</li>
+                                            <li>需要创意性的场景</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="cot" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.3 思维链（Chain-of-Thought, CoT）</h3>
+                                <p class="text-gray-600 dark:text-gray-300">思维链方法的核心思想是将思考的过程及其相关的观念和想法串联起来，形成一个连续的思维链条。这种链条可以由线性或非线性的思维过程构成，从而帮助模型不断延伸和扩展思考。相比于之前传统的上下文学习（即通过 x1, y1, x2 ,y2 ,.... xtest 作为输入来让大模型补全输出 ytest），思维链多了中间的推导提示。</p>
+                                
+                                <div class="mt-4 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                    <div class="flex space-x-4">
+                                        <div class="w-1/2">
+                                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">传统上下文学习</h4>
+                                            <pre class="text-sm bg-white dark:bg-gray-800 p-3 rounded">
+输入: 问题X
+输出: 答案Y
+                                            </pre>
+                                        </div>
+                                        
+                                        <div class="w-1/2">
+                                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">思维链方法</h4>
+                                            <pre class="text-sm bg-white dark:bg-gray-800 p-3 rounded">
+输入: 问题X
+中间: 思考步骤1 → 步骤2 → 步骤3...
+输出: 答案Y
+                                            </pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="training-methods" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.4 LLM 基本训练方法</h3>
+                                <div class="mt-4">
+                                    <img src="attachments/大模型 LLM_image_4.png" alt="LLM基本训练方法" class="rounded-lg w-full">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="pretraining" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.5 预训练（Pretraining）</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">LLM 训练通常采用大规模无监督学习，即：</p>
+                                <ol class="list-decimal pl-5 text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li>从互联网上收集大量文本数据，如书籍、新闻、社交媒体等。</li>
+                                    <li>让模型学习词语之间的概率分布，理解句子结构。</li>
+                                    <li>训练目标是最小化预测误差，使其能更好地完成语言任务。</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="post-training" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.6 后训练（Post-training）</h3>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-3">
+                                    <li><strong>监督微调 (Supervised Fine-Tuning, SFT):</strong> 使用带有标注的特定任务数据对模型进行训练。</li>
+                                    <li><strong>指令微调 (Instruction Tuning):</strong> 使用指令格式的数据集对模型进行微调，使其能够理解并遵循人类指令。</li>
+                                    <li><strong>基于人类反馈的强化学习 (RLHF):</strong> 通过人类对模型输出的偏好反馈，训练一个奖励模型，然后利用强化学习算法调整大模型的行为，使其生成更符合人类偏好的输出。</li>
+                                    <li><strong>直接偏好优化 (DPO):</strong> 一种简化了RLHF流程的方法，直接使用人类偏好数据训练模型，无需单独训练奖励模型。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="reinforcement-learning" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">3.7 强化学习（Reinforcement Learning, RL）</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">采用强化学习（RL）方法进行优化，主要通过人类反馈强化学习（RLHF,Reinforcement Learning from Human Feedback）：</p>
+                                <ol class="list-decimal pl-5 text-gray-600 dark:text-gray-300 space-y-2 mb-6">
+                                    <li>人类标注者提供高质量回答。</li>
+                                    <li>模型学习人类评分标准，提高输出质量。</li>
+                                    <li>强化训练，使得生成的文本更符合人类偏好。</li>
+                                </ol>
+                                
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">DeepSeek-R1 完整训练过程</h4>
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">DeepSeek-R1 主要亮点在于出色的数学和逻辑推理能力，区别于一般的通用 AI 模型。其训练方式结合了强化学习（RL）与监督微调（SFT），创造了一种高效训练，高推理能力 AI 模型的方法。</p>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">整个训练过程分为核心两阶段，第一步训练基于 DeepSeek-V3 论文中的基础模型（而非最终版本），并经历了 SFT 和基于纯强化学习调优 + 通用性偏好调整，如下图</p>
+                                
+                                <div class="mt-4">
+                                    <img src="attachments/大模型 LLM_image_5.png" alt="R1 完整训练过程" class="rounded-lg w-full">
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mt-4"><strong>训练起点:</strong> DeepSeek-R1 的训练起点是 DeepSeek-v3-Base，作为基础模型进行训练，为后续的推理优化奠定基础。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 第四部分: LLM应用 -->
+                <section id="applications" class="fade-in">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">4. LLM应用</h2>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="api-calling" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">4.1 API 调用</h3>
+                                
+                                <div class="space-y-6">
+                                    <div>
+                                        <h4 id="api-platforms" class="font-semibold text-gray-900 dark:text-white mb-3">4.1.1 API 提供平台</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-3">LLM API 的提供平台分为：</p>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">模型提供商</h5>
+                                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">这是最直接和主要的途径。许多领先的AI公司都提供其大模型的API服务，你通常需要在他们的官方网站上注册账号，创建API密钥，然后就可以通过他们的API接口调用模型。</p>
+                                                <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://www.deepseek.com/" class="text-primary-600 dark:text-primary-400 hover:underline">深度求索</a></li>
+                                                    <li><a href="https://platform.moonshot.cn/console/api-keys" class="text-primary-600 dark:text-primary-400 hover:underline">月之暗面</a></li>
+                                                    <li><a href="https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys" class="text-primary-600 dark:text-primary-400 hover:underline">智谱清言</a></li>
+                                                    <li><a href="https://openai.com/" class="text-primary-600 dark:text-primary-400 hover:underline">OpenAI</a></li>
+                                                    <li><a href="https://www.anthropic.com/" class="text-primary-600 dark:text-primary-400 hover:underline">Anthropic</a></li>
+                                                    <li><a href="https://aistudio.google.com/apikey" class="text-primary-600 dark:text-primary-400 hover:underline">Google</a></li>
+                                                    <li><a href="https://grok.com/" class="text-primary-600 dark:text-primary-400 hover:underline">Grok</a></li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">第三方API聚合平台/代理服务</h5>
+                                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">它们聚合了多家大模型的API，用户可以通过一个统一的接口调用不同提供商的模型。</p>
+                                                <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://cloud.siliconflow.cn/models" class="text-primary-600 dark:text-primary-400 hover:underline">硅基流动</a></li>
+                                                    <li><a href="https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey?apikey=%7B%7D" class="text-primary-600 dark:text-primary-400 hover:underline">火山引擎</a></li>
+                                                    <li><a href="https://bailian.console.aliyun.com" class="text-primary-600 dark:text-primary-400 hover:underline">阿里云百炼</a></li>
+                                                    <li><a href="https://console.bce.baidu.com/qianfan/overview?_=1742193122648" class="text-primary-600 dark:text-primary-400 hover:underline">百度智能云</a></li>
+                                                    <li><a href="https://openrouter.ai/" class="text-primary-600 dark:text-primary-400 hover:underline">Openrouter</a></li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">开源模型和本地部署</h5>
+                                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">对于一些开源的大模型（如Meta的Llama系列、Mistral AI的模型、Hugging Face上的一些模型等），如果你具备相应的技术能力和计算资源，可以选择将模型下载到本地或私有服务器上进行部署。</p>
+                                                <ul class="list-disc pl-5 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://huggingface.co/" class="text-primary-600 dark:text-primary-400 hover:underline">Hugging Face</a></li>
+                                                    <li><a href="https://modelscope.cn/my/overview" class="text-primary-600 dark:text-primary-400 hover:underline">魔搭社区</a></li>
+                                                    <li><a href="https://ollama.com/" class="text-primary-600 dark:text-primary-400 hover:underline">ollama</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 id="agent-products" class="font-semibold text-gray-900 dark:text-white mb-3">4.1.3 Agent 产品</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li><a href="https://manus.im/" class="text-primary-600 dark:text-primary-400 hover:underline">Manus</a></li>
+                                            <li><a href="https://github.com/FoundationAgents/OpenManus" class="text-primary-600 dark:text-primary-400 hover:underline">FoundationAgents/OpenManus</a></li>
+                                            <li><a href="https://autoglm-research.zhipuai.cn/" class="text-primary-600 dark:text-primary-400 hover:underline">AutoGLM 沉思</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 id="code-tools" class="font-semibold text-gray-900 dark:text-white mb-3">4.1.4 AI 代码开发工具</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">AI 代码编辑器</h5>
+                                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://cursor.sh/loginDeepPage" class="text-primary-600 dark:text-primary-400 hover:underline">Cursor</a> AI 代码编辑器</li>
+                                                    <li><a href="https://windsurf.com/editor" class="text-primary-600 dark:text-primary-400 hover:underline">Windsurf</a></li>
+                                                    <li><a href="https://www.trae.ai/" class="text-primary-600 dark:text-primary-400 hover:underline">Trae</a> 字节 AI TDE</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div>
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">vscode 插件</h5>
+                                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li>GitHub Copilot</li>
+                                                    <li>Cline</li>
+                                                    <li>Augment</li>
+                                                    <li>通义灵码</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div>
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">其他</h5>
+                                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://deepwiki.com/" class="text-primary-600 dark:text-primary-400 hover:underline">deepwiki</a> github 仓库详细解释网页 (wiki) 生成工具</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white mb-3">4.1.5 桌面工具</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li><a href="https://cherry-ai.com/" class="text-primary-600 dark:text-primary-400 hover:underline">CherryStudio</a></li>
+                                            <li><a href="https://chatboxai.app/zh" class="text-primary-600 dark:text-primary-400 hover:underline">Chatbox AI</a></li>
+                                            <li><a href="https://flowith.net/" class="text-primary-600 dark:text-primary-400 hover:underline">flowith 2.0</a></li>
+                                            <li><a href="https://ima.qq.com/" class="text-primary-600 dark:text-primary-400 hover:underline">ima.copilot</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white mb-3">4.1.6 AI 搜索引擎</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">AI 搜索</h5>
+                                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://metaso.cn/" class="text-primary-600 dark:text-primary-400 hover:underline">秘塔搜索AI</a></li>
+                                                    <li><a href="https://bochaai.com/" class="text-primary-600 dark:text-primary-400 hover:underline">BoCha 博查AI搜索</a></li>
+                                                    <li><a href="https://search.tiangong.cn/" class="text-primary-600 dark:text-primary-400 hover:underline">天工AI搜索</a></li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div>
+                                                <h5 class="font-medium text-gray-900 dark:text-white mb-2">搜索服务商</h5>
+                                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                                    <li><a href="https://www.epsilon-ai.com/search?signup=true" class="text-primary-600 dark:text-primary-400 hover:underline">Epsilon AI</a> 学术搜索</li>
+                                                    <li><a href="https://app.tavily.com/" class="text-primary-600 dark:text-primary-400 hover:underline">tavily AI</a> AI 搜索 API</li>
+                                                    <li><a href="https://api-dashboard.search.brave.com/app/dashboard" class="text-primary-600 dark:text-primary-400 hover:underline">brave search</a> AI 搜索 API</li>
+                                                    <li><a href="https://dashboard.exa.ai/playground" class="text-primary-600 dark:text-primary-400 hover:underline">Exa</a> 硅谷的 AI 搜索 API</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 dark:text-white mb-3">4.1.7 文档处理工具</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li><a href="https://linfo.ai/" class="text-primary-600 dark:text-primary-400 hover:underline">linfo.ai PDF阅读</a> PDF 阅读</li>
+                                            <li><a href="https://notebooklm.google/" class="text-primary-600 dark:text-primary-400 hover:underline">NotebookLM</a></li>
+                                            <li><a href="https://app.humata.ai/" class="text-primary-600 dark:text-primary-400 hover:underline">Humata</a></li>
+                                            <li><a href="https://arxiv-viz.ianhsiao.xyz/landing" class="text-primary-600 dark:text-primary-400 hover:underline">Paper Visualizer</a> 学术论文可视化的在线工具, 支持多种来源的论文（arXiv 和 PDF）</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="rag" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">4.2 RAG</h3>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+                                    <p class="text-blue-800 dark:text-blue-300">
+                                        <strong>要点:</strong> RAG (Retrieval Augmented Generation，检索增强生成) 是目前 LLM 应用落地的重要方向，主要的应用场景是企业客服系统和搜索结果结构化展示（代表作是 Perplexity 和秘塔）。RAG 对数据的规范程度要求比较高，数据越规范，查询效果越好，结合树形结构或知识图谱结构的数据，RAG 可以实现更好的效果。
+                                    </p>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">开源 RAG 框架推荐：Cohere；Cognita</p>
+                                
+                                <div class="mt-4">
+                                    <img src="attachments/大模型 LLM_image_6.png" alt="RAG架构" class="rounded-lg w-full">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="agent" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">4.3 Agent</h3>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+                                    <p class="text-blue-800 dark:text-blue-300">
+                                        <strong>要点:</strong> Agent翻译成中文是智能体的意思，是AGI的前奏。现阶段的Agent只能算<strong>工作流</strong>，什么时候Agent能根据用户要求直接创建好Agent，才算是真正的智能体。
+                                    </p>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">Agent 的研究可以追溯到 20 世纪 50 年代，当时被称为"智能体"或"自主体"。随着人工智能技术的发展，Agent 的概念和应用也越来越广泛。</p>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">Agent 具有以下核心概念：</p>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-2 mb-4">
+                                    <li><strong>感知（Perception）：</strong>Agent 通过传感器感知外部环境，获取信息。</li>
+                                    <li><strong>决策（Decision Making）：</strong>Agent 根据感知到的信息进行决策，确定下一步行动。</li>
+                                    <li><strong>执行（Execution）：</strong>Agent 根据决策执行相应的动作，影响外部环境。</li>
+                                    <li><strong>学习（Learning）：</strong>Agent 通过与环境的交互，不断学习和优化自己的决策和执行策略。</li>
+                                </ul>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">AI Agent的在大模型时代由OpenAI团队重新定义。OpenAI认为，AI Agent就是由大模型驱动，由规划能力组件（Planning）、记忆组件（Memory）、工具组件（Tools）、行为组件（Action）等组件所组成的"智能助手"。</p>
+                                
+                                <div class="mt-4 mb-6">
+                                    <img src="attachments/大模型 LLM_image_7.png" alt="Agent架构" class="rounded-lg w-full">
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">目前好用的Agent平台是Coze\Dify\n8n</p>
+                                
+                                <div class="mt-4 mb-6">
+                                    <img src="attachments/大模型 LLM_image_8.png" alt="Coze实例(舆情分析)" class="rounded-lg w-full">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center">coze的一个实例(舆情分析)</p>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300">还有看起来更加"科幻"Agent产品形式-- Manus, 本质是一个多 Agent 系统, 其开源版本 <a href="https://github.com/FoundationAgents/OpenManus" class="text-primary-600 dark:text-primary-400 hover:underline">OpenManus</a></p>
+                                <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1 mt-2">
+                                    <li><a href="https://deepwiki.com/FoundationAgents/OpenManus" class="text-primary-600 dark:text-primary-400 hover:underline">FoundationAgents/OpenManus | DeepWiki</a></li>
+                                    <li><a href="https://mvhi0v1y6xe.feishu.cn/docx/FHYJd3p0EotvlLxM3TpcIXv0n5d" class="text-primary-600 dark:text-primary-400 hover:underline">OpenManus Hackathon项目投票</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover-card">
+                            <div class="p-6">
+                                <h3 id="mcp" class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">4.4 MCP(大模型上下文协议)</h3>
+                                
+                                <div class="mb-4">
+                                    <div class="text-gray-600 dark:text-gray-300 mb-2">参考资源:</div>
+                                    <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                        <li><a href="https://zhuanlan.zhihu.com/p/27327515233" class="text-primary-600 dark:text-primary-400 hover:underline">一文看懂：MCP(大模型上下文协议) - 知乎</a></li>
+                                        <li><a href="https://modelcontextprotocol.io/introduction" class="text-primary-600 dark:text-primary-400 hover:underline">MCP官方</a></li>
+                                        <li><a href="https://docs.anthropic.com/en/home" class="text-primary-600 dark:text-primary-400 hover:underline">Anthropic技术文档</a></li>
+                                        <li><a href="https://arxiv.org/abs/2503.23278" class="text-primary-600 dark:text-primary-400 hover:underline">[2503.23278] Model Context Protocol (MCP): Landscape, Security Threats, and Future Research Directions</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">MCP 起源于 2024 年 11 月 25 日 Anthropic 发布的文章：<a href="https://link.zhihu.com/?target=https%3A//www.anthropic.com/news/model-context-protocol" class="text-primary-600 dark:text-primary-400 hover:underline">Introducing the Model Context Protocol</a>。</p>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">MCP （Model Context Protocol，模型上下文协议）定义了应用程序和 AI 模型之间交换上下文信息的方式。这使得开发者能够<strong>以一致的方式将各种数据源、工具和功能连接到 AI 模型</strong>（一个中间协议层），就像 USB-C 让不同设备能够通过相同的接口连接一样。MCP 的目标是创建一个通用标准，使 AI 应用程序的开发和集成变得更加简单和统一。</p>
+                                
+                                <p class="text-gray-600 dark:text-gray-300 mb-3">所谓一图胜千言，我这里引用一些制作的非常精良的图片来帮助理解</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <img src="attachments/大模型 LLM_image_9.png" alt="MCP示意图1" class="rounded-lg w-full">
+                                    <img src="attachments/大模型 LLM_image_10.png" alt="MCP示意图2" class="rounded-lg w-full">
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">1. MCP 服务收集网址 (As of March 27, 2025):</h4>
+                                    
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Collection</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mode</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Servers</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">MCP.so</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">mcp.so</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">4774</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mcp.so/" class="hover:underline">mcp.so</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Glama</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">glama.ai</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">3356</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://glama.ai/mcp/servers" class="hover:underline">glama.ai</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">PulseMCP</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Antanavicius et al.</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">3164</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://www.pulsemcp.com/" class="hover:underline">pulsemcp.com</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Smithery</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Henry Mao</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">2942</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://smithery.ai/" class="hover:underline">smithery.ai</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Dockmaster</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">mcp-dockmaster</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Desktop App</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">517</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mcp-dockmaster.com/" class="hover:underline">mcp-dockmaster.com</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Official Collection</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Anthropic</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">GitHub Repo</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">320</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://github.com/modelcontextprotocol/servers" class="hover:underline">modelcontextprotocol/servers</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">AiMCP</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Hekmon</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">313</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://www.aimcp.info/" class="hover:underline">aimcp.info</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">MCP.run</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">mcp.run</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">114</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mcp.run/" class="hover:underline">mcp.run</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Awesome MCP Servers</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Stephen Akinyemi</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">GitHub Repo</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">88</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://github.com/appcypher/awesome-mcp-servers" class="hover:underline">appcypher/mcp-servers</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">mcp-get registry</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Michael Latman</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">59</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mcp-get.com/" class="hover:underline">mcp-get.com</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Awesome MCP Servers</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">wong2</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">34</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mcpservers.org/" class="hover:underline">mcpservers.org</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">OpenTools</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">opentoolsteam</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">25</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://opentools.com/" class="hover:underline">opentools.com</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Toolbase</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">gching</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Desktop App</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">24</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://gettoolbase.ai/" class="hover:underline">gettoolbase.ai</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">make inference</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">mkinf</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Website</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">20</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://mkinf.io/" class="hover:underline">mkinf.io</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Awesome Crypto MCP Servers</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">Luke Fan</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">GitHub Repo</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">13</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-primary-600 dark:text-primary-400"><a href="https://github.com/badkk/awesome-crypto-mcp-servers" class="hover:underline">badkk/crypto-mcp-servers</a></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h4 class="font-semibold text-gray-900 dark:text-white mb-3">2. 在线 MCP 服务</h4>
+                                        <ul class="list-disc pl-5 text-gray-600 dark:text-gray-300 space-y-1">
+                                            <li><a href="https://bailian.console.aliyun.com/?tab=mcp#/mcp-market" class="text-primary-600 dark:text-primary-400 hover:underline">阿里云百炼</a></li>
+                                            <li><a href="https://www.modelscope.cn/mcp" class="text-primary-600 dark:text-primary-400 hover:underline">魔搭社区MCP</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 第五部分: 资源 -->
+                <section id="resources" class="fade-in">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700">5. 资源</h2>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                        <blockquote class="pl-4 border-l-4 border-primary-500">
+                            <p class="text-gray-600 dark:text-gray-300 italic">
+                                <a href="https://github.com/WangRongsheng/awesome-LLM-resourses" class="text-primary-600 dark:text-primary-400 hover:underline">WangRongsheng/awesome-LLM-resourses: 🧑‍🚀 全世界最好的LLM资料总结（Agent框架、辅助编程、数据处理、模型训练、模型推理、o1 模型、MCP、小语言模型、视觉语言模型） | Summary of the world's best LLM resources.</a>
+                            </p>
+                        </blockquote>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 dark:bg-gray-800 py-12 mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-brain text-primary-600 mr-2"></i>
+                        大模型 LLM
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mt-2">全面解析人工智能前沿技术</p>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="https://github.com/Chi-hong22" class="text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-600 dark:text-gray-400">&copy; 2025 游子昂. 哈尔滨工程大学智能海洋航行器技术全国重点实验室</p>
+                <p class="text-gray-500 dark:text-gray-500 text-sm mt-1">National Key Laboratory of Autonomous Marine Vehicle Technology</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/preline/dist/preline.min.js"></script>
+    <script>
+        // 深色模式切换
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+        });
+        
+        // 检查系统偏好
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 关闭移动菜单（当点击链接时）
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+        
+        // 添加淡入动画
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        fadeElements.forEach(element => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(10px)';
+            element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(element);
+        });
+    </script>
+</body>
+</html> 
