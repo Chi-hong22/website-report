@@ -250,6 +250,20 @@
             box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
         }
 
+        .project-links {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .project-links .project-link {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0.6rem 1rem;
+        }
+
         .no-results {
             text-align: center;
             color: white;
@@ -396,12 +410,24 @@
             },
             {
                 name: 'LNN',
-                description: '液体神经网络（Liquid Neural Networks）的研究项目，探索动态神经网络架构。',
+                description: '液体神经网络（Liquid Neural Networks）的交互式探索，深入了解这种新兴的AI架构。',
                 path: 'LNN/index.html',
                 type: 'Neural Networks',
-                status: 'In Development',
+                status: 'Active',
                 icon: '🌊',
-                category: 'Research'
+                category: 'Research',
+                links: [
+                    {
+                        name: '国外版',
+                        url: 'LNN/index.html',
+                        icon: '🌍'
+                    },
+                    {
+                        name: '国内版',
+                        url: 'https://mcp.edgeone.site/share/8muuQLZl3nkE76G8dzwNE',
+                        icon: '🇨🇳'
+                    }
+                ]
             },
             {
                 name: 'PDF 资源库',
@@ -483,9 +509,18 @@
                             <span class="project-type">${project.type}</span>
                             <span class="project-status">${project.status}</span>
                         </div>
-                        <a href="${project.path}" class="project-link">
-                            查看项目 →
-                        </a>
+                        ${project.links ? 
+                            `<div class="project-links">
+                                ${project.links.map(link => 
+                                    `<a href="${link.url}" class="project-link" title="${link.name}">
+                                        ${link.icon} ${link.name}
+                                    </a>`
+                                ).join('')}
+                            </div>` :
+                            `<a href="${project.path}" class="project-link">
+                                查看项目 →
+                            </a>`
+                        }
                     </div>
                 `).join('');
             }
