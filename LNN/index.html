@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>液态神经网络(LNN)交互式探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutrals with Muted Blue Accent -->
+    <!-- Application Structure Plan: A single-page, multi-section layout with a sticky navigation bar. The structure is thematic, starting with a high-level overview, then diving into core principles, evolution, a critical comparison with other architectures, applications, performance, and finally developer resources. This non-linear structure, supported by navigation, allows users to explore based on their interests (e.g., a developer might jump to comparisons, while a strategist might focus on applications). Interactive elements like a clickable timeline and filterable charts are used to make dense information digestible and engaging, transforming the static report into an exploratory tool. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: LNN Evolution -> Goal: Show Change -> Viz: Interactive Vertical Timeline (HTML/CSS) -> Interaction: Click to expand details -> Justification: More engaging and less overwhelming than text.
+        - Report Info: Complexity vs Transformer -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Buttons to toggle views (Inference/Memory) -> Justification: Visually quantifies the key efficiency advantage of LNNs.
+        - Report Info: Feature Comparison Table -> Goal: Compare -> Viz: Styled HTML Table -> Interaction: Hover highlights -> Justification: Clear, structured comparison of multiple attributes.
+        - Report Info: Performance Benchmarks -> Goal: Inform/Compare -> Viz: Bar Chart (Chart.js) -> Interaction: No interaction needed for simplicity, focuses on key SOTA results -> Justification: Highlights key performance wins in a scannable format.
+        - Report Info: Core Principles -> Goal: Inform -> Viz: Icon-based cards (HTML/CSS) -> Interaction: None -> Justification: Breaks down foundational concepts into easy-to-grasp visual chunks.
+        - Library/Method: Chart.js for all charts on Canvas, custom HTML/CSS/JS for the timeline and other interactive elements. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 45vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0369a1; /* sky-700 */
+            border-bottom-color: #0369a1; /* sky-700 */
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: -21px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #e2e8f0; /* slate-200 */
+            border: 2px solid #0369a1; /* sky-700 */
+        }
+        .card-hover {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="scroll-smooth">
+
+    <header id="header" class="bg-slate-50/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#hero" class="text-2xl font-bold text-sky-700">LNN Explorer</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#principles" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">核心原理</a>
+                        <a href="#evolution" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">演进之路</a>
+                        <a href="#comparison" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">架构对决</a>
+                        <a href="#applications" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">应用前景</a>
+                        <a href="#performance" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">性能基准</a>
+                        <a href="#resources" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">开源资源</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="hero" class="text-center pt-16 pb-24">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900">
+                探索<span class="text-sky-600">液态神经网络</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-slate-600">
+                一种受生物启发的AI新范式，以极致的效率和鲁棒性，应对复杂的动态世界。
+            </p>
+            <p class="mt-2 max-w-3xl mx-auto text-md text-slate-500">
+                本应用将原始的研究报告转化为一个交互式的探索体验。您可以通过可视化图表和精炼解读，快速掌握LNN的技术精髓、发展脉络及其与主流AI架构的本质区别。
+            </p>
+        </section>
+
+        <section id="principles" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">核心原理</h2>
+                <p class="mt-4 text-lg text-slate-600">LNN的设计哲学源于对生物智能的深刻洞察，并将其转化为严谨的数学模型。</p>
+            </div>
+            <div class="mt-12 grid gap-8 md:grid-cols-3">
+                <div class="bg-white p-8 rounded-xl shadow-md card-hover">
+                    <div class="text-4xl text-sky-600">🧠</div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">生物启示</h3>
+                    <p class="mt-2 text-slate-600">灵感来自仅有302个神经元的秀丽隐杆线虫。它证明了用极简的结构可以实现复杂的自适应行为，启发了LNN追求极致的参数效率。</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md card-hover">
+                    <div class="text-4xl text-sky-600">∫</div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">连续时间动态</h3>
+                    <p class="mt-2 text-slate-600">与传统神经网络的离散步长不同，LNN使用常微分方程(ODE)描述状态的连续变化，能原生处理不规则的真实世界数据流。</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md card-hover">
+                    <div class="text-4xl text-sky-600">💧</div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">“液态”特性</h3>
+                    <p class="mt-2 text-slate-600">其核心是神经元的时间常数(记忆周期)是动态可变的。网络能根据输入信号的复杂性，实时调整自身的响应速度和记忆长度。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="evolution" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">演进之路</h2>
+                <p class="mt-4 text-lg text-slate-600">从一个优雅的理论到高效的工程实现，再到商业化的基础模型，LNN在短短数年内经历了快速迭代。</p>
+            </div>
+            <div class="mt-12 max-w-3xl mx-auto">
+                <div id="timeline-container" class="relative border-l-2 border-slate-200 pl-8 space-y-12">
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">架构对决：LNN vs. Transformer</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">LNN和Transformer代表了处理序列数据的两条不同技术路线。它们的核心差异主要体现在计算范式和效率上，尤其是在处理长序列时。</p>
+            </div>
+            
+            <div class="mt-12 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-slate-800 text-center">计算 & 内存复杂度对比</h3>
+                <p class="text-center mt-2 text-slate-500">LNN在推理长序列时展现出巨大的效率优势，其时间和内存开销几乎不随序列增长而增加。</p>
+                <div class="mt-6 flex justify-center space-x-2">
+                    <button id="inference-btn" class="px-4 py-2 text-sm font-semibold rounded-md bg-sky-600 text-white shadow-sm">推理时间复杂度</button>
+                    <button id="memory-btn" class="px-4 py-2 text-sm font-semibold rounded-md bg-white text-slate-700 ring-1 ring-slate-300">推理内存复杂度</button>
+                </div>
+                <div class="chart-container mt-6">
+                    <canvas id="complexityChart"></canvas>
+                </div>
+                <figcaption class="mt-2 text-center text-sm text-slate-500">此图表以对数尺度示意性地展示了复杂度随序列长度(L)的增长趋势。</figcaption>
+            </div>
+
+            <div class="mt-16 overflow-x-auto">
+                <h3 class="text-2xl font-bold text-slate-800 text-center">核心特性对比</h3>
+                <div class="mt-6 flow-root">
+                    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                            <table class="min-w-full divide-y divide-slate-300 bg-white rounded-lg shadow-md">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">特性</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">液态神经网络 (LNN)</th>
+                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Transformer</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">核心机制</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">连续时间动态系统 (ODE)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">并行自注意力机制</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">时间处理</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">原生支持不规则时间</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">通过位置编码注入时序</td>
+                                    </tr>
+                                     <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">推理内存 (长序列)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600 font-semibold text-green-600">几乎恒定 O(1)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600 font-semibold text-red-600">线性增长 O(L)</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">推理时间 (长序列)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600 font-semibold text-green-600">线性增长 O(L)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600 font-semibold text-red-600">平方增长 O(L²)</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">并行性</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">序贯处理，并行性差</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">高度并行，训练快</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">因果性</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">内在性强 (源于动态系统)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-600">从数据中学习相关性</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">优势、挑战与应用前景</h2>
+                <p class="mt-4 text-lg text-slate-600">LNN的独特属性为其开辟了广阔的应用空间，但其推广也面临着现实的挑战。</p>
+            </div>
+            <div class="mt-12 grid gap-8 md:grid-cols-2">
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold text-green-600">光明前景 (The Good)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-600">
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-green-500">✅</span><span><strong>边缘AI革命:</strong> 极高的效率使其非常适合在自动驾驶、机器人和可穿戴设备上进行实时、低功耗决策。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-green-500">✅</span><span><strong>鲁棒与安全:</strong> 在噪声和环境变化中表现更稳定，对安全关键系统(如医疗、无人车)至关重要。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-green-500">✅</span><span><strong>因果与可解释性:</strong> 动态系统本质有望构建更易理解其决策逻辑的AI模型。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-green-500">✅</span><span><strong>长上下文新范式:</strong> 极具成本效益地处理超长文档、视频和基因序列等。</span></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold text-amber-600">现实挑战 (The Bad & Ugly)</h3>
+                    <ul class="mt-4 space-y-3 text-slate-600">
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-amber-500">⚠️</span><span><strong>训练复杂性:</strong> 动态系统的性质可能需要更复杂的超参数调整和调试技巧。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-amber-500">⚠️</span><span><strong>长程依赖的根本挑战:</strong> 作为RNN的变体，处理极长序列时仍可能面临梯度问题，需混合架构弥补。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-amber-500">⚠️</span><span><strong>生态系统缺失:</strong> 缺乏像Hugging Face之于Transformer那样的成熟工具链、社区和预训练模型库。</span></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1 text-amber-500">⚠️</span><span><strong>可解释性的鸿沟:</strong> 理论上更可解，但完全理解复杂LNN的内部动态对非专家仍是巨大挑战。</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section id="performance" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">性能基准</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">LNN及其变体在多个关键基准测试中展示了其卓越的性能和效率，尤其是在长序列处理和物理动态建模上。</p>
+            </div>
+            <div class="mt-12 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-slate-800 text-center">长程竞技场(LRA)基准测试平均准确率</h3>
+                <p class="text-center mt-2 text-slate-500">LRA是一组用于评估模型处理长序列能力的挑战性任务。</p>
+                 <div class="chart-container mt-6">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <figcaption class="mt-2 text-center text-sm text-slate-500">数据显示Liquid-S4在此项基准测试中取得了超越先前SOTA模型的性能。</figcaption>
+            </div>
+        </section>
+
+
+        <section id="resources" class="py-16 scroll-mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">开源项目与学习资源</h2>
+                <p class="mt-4 text-lg text-slate-600">对于希望实践LNN的开发者，社区提供了一些宝贵的官方和社区资源。</p>
+            </div>
+            <div class="mt-12 max-w-4xl mx-auto grid gap-6 md:grid-cols-2">
+                <a href="https://github.com/raminmh/liquid_time_constant_networks" target="_blank" class="block p-6 bg-white rounded-lg shadow-md card-hover">
+                    <h3 class="font-semibold text-sky-700">LTC 原始实现 (奠基)</h3>
+                    <p class="mt-1 text-sm text-slate-600">理解LNN起源的必看项目，基于TensorFlow 1.x。</p>
+                </a>
+                <a href="https://github.com/raminmh/CfC" target="_blank" class="block p-6 bg-white rounded-lg shadow-md card-hover">
+                    <h3 class="font-semibold text-sky-700">CfC 官方实现 (高效)</h3>
+                    <p class="mt-1 text-sm text-slate-600">高效CfC模型的关键资源，提供TF2和PyTorch版本。</p>
+                </a>
+                <a href="https://github.com/raminmh/liquid-s4" target="_blank" class="block p-6 bg-white rounded-lg shadow-md card-hover">
+                    <h3 class="font-semibold text-sky-700">Liquid-S4 官方实现 (SOTA)</h3>
+                    <p class="mt-1 text-sm text-slate-600">复现SOTA结果和进行前沿研究的进阶项目。</p>
+                </a>
+                <a href="https://github.com/kyegomez/LFM" target="_blank" class="block p-6 bg-white rounded-lg shadow-md card-hover">
+                    <h3 class="font-semibold text-sky-700">LFM 开源尝试 (商业化)</h3>
+                    <p class="mt-1 text-sm text-slate-600">社区对闭源Liquid Foundation Model的复现尝试。</p>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p>LNN交互式探索应用</p>
+            <p class="text-sm text-slate-400 mt-1">基于研究报告动态生成，旨在提供更佳的信息消费体验。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const timelineData = [
+        {
+            year: '2020-2021',
+            title: 'LTC (液态时间常数网络)',
+            description: '奠基之作。完整实现了基于ODE和动态时间常数的核心思想，但严重依赖数值ODE求解器，计算效率极低。',
+            status: '理论验证'
+        },
+        {
+            year: '2021',
+            title: 'CfC (闭式连续时间模型)',
+            description: '效率革命。通过近似闭式解替代ODE求解器，将速度提升了数个数量级，使LNN具备了实际应用价值。',
+            status: '工程突破'
+        },
+        {
+            year: '2022',
+            title: 'Liquid-S4',
+            description: '性能巅峰。将LNN的动态性与S4架构强大的长程依赖能力深度融合，在LRA等基准上取得SOTA性能。',
+            status: 'SOTA性能'
+        },
+        {
+            year: '2024',
+            title: 'LFM (液态基础模型)',
+            description: '商业化落地。由Liquid AI公司主导，将LNN原理规模化，并融合MoE等技术，旨在与主流大模型竞争。',
+            status: '商业产品'
+        }
+    ];
+
+    const timelineContainer = document.getElementById('timeline-container');
+    timelineData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'relative timeline-item';
+        div.innerHTML = `
+            <div class="p-6 bg-white rounded-xl shadow-md card-hover cursor-pointer timeline-card">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-lg font-bold text-slate-900">${item.title}</h4>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-sky-600 bg-sky-200">${item.status}</span>
+                </div>
+                <p class="text-sm text-slate-500 mt-1">${item.year}</p>
+                <div class="timeline-content hidden mt-3 text-slate-600">
+                    <p>${item.description}</p>
+                </div>
+            </div>
+        `;
+        timelineContainer.appendChild(div);
+    });
+
+    timelineContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.timeline-card');
+        if (card) {
+            const content = card.querySelector('.timeline-content');
+            content.classList.toggle('hidden');
+        }
+    });
+
+    const complexityData = {
+        inference: {
+            labels: ['L=1k', 'L=2k', 'L=4k', 'L=8k', 'L=16k'],
+            lnn: [1, 2, 4, 8, 16], 
+            transformer: [1000, 4000, 16000, 64000, 256000]
+        },
+        memory: {
+            labels: ['L=1k', 'L=2k', 'L=4k', 'L=8k', 'L=16k'],
+            lnn: [1, 1, 1, 1, 1],
+            transformer: [1, 2, 4, 8, 16]
+        }
+    };
+
+    const complexityCtx = document.getElementById('complexityChart').getContext('2d');
+    let complexityChart;
+
+    const createComplexityChart = (mode) => {
+        const data = complexityData[mode];
+        const title = mode === 'inference' ? '推理时间复杂度 O(L) vs O(L²)' : '推理内存复杂度 O(1) vs O(L)';
+        
+        if (complexityChart) {
+            complexityChart.destroy();
+        }
+
+        complexityChart = new Chart(complexityCtx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'LNN',
+                        data: data.lnn,
+                        backgroundColor: 'rgba(56, 189, 248, 0.6)', // light-blue-400
+                        borderColor: 'rgba(2, 132, 199, 1)', // cyan-600
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Transformer',
+                        data: data.transformer,
+                        backgroundColor: 'rgba(244, 114, 182, 0.6)', // pink-400
+                        borderColor: 'rgba(219, 39, 119, 1)', // pink-600
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title,
+                        font: { size: 16, weight: 'bold' },
+                        color: '#1e293b'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += `相对开销 ${context.parsed.y}`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        title: {
+                            display: true,
+                            text: '相对开销 (对数尺度)'
+                        }
+                    },
+                    x: {
+                         title: {
+                            display: true,
+                            text: '序列长度 (L)'
+                        }
+                    }
+                }
+            }
+        });
+    };
+    
+    const inferenceBtn = document.getElementById('inference-btn');
+    const memoryBtn = document.getElementById('memory-btn');
+    
+    inferenceBtn.addEventListener('click', () => {
+        createComplexityChart('inference');
+        inferenceBtn.classList.add('bg-sky-600', 'text-white');
+        inferenceBtn.classList.remove('bg-white', 'text-slate-700', 'ring-1', 'ring-slate-300');
+        memoryBtn.classList.add('bg-white', 'text-slate-700', 'ring-1', 'ring-slate-300');
+        memoryBtn.classList.remove('bg-sky-600', 'text-white');
+    });
+
+    memoryBtn.addEventListener('click', () => {
+        createComplexityChart('memory');
+        memoryBtn.classList.add('bg-sky-600', 'text-white');
+        memoryBtn.classList.remove('bg-white', 'text-slate-700', 'ring-1', 'ring-slate-300');
+        inferenceBtn.classList.add('bg-white', 'text-slate-700', 'ring-1', 'ring-slate-300');
+        inferenceBtn.classList.remove('bg-sky-600', 'text-white');
+    });
+
+    createComplexityChart('inference');
+
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(performanceCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Transformer (Linformer)', 'S4', 'Liquid-S4'],
+            datasets: [{
+                label: '平均准确率 (%)',
+                data: [82.59, 86.56, 87.32],
+                backgroundColor: [
+                    'rgba(251, 146, 60, 0.6)', // orange-400
+                    'rgba(139, 92, 246, 0.6)', // violet-500
+                    'rgba(14, 165, 233, 0.6)'  // sky-500
+                ],
+                borderColor: [
+                    'rgba(234, 88, 12, 1)', // orange-600
+                    'rgba(109, 40, 217, 1)', // violet-700
+                    'rgba(3, 105, 161, 1)'   // sky-700
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `准确率: ${context.parsed.x}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: false,
+                    min: 82,
+                    title: {
+                        display: true,
+                        text: '准确率 (%)'
+                    }
+                }
+            }
+        }
+    });
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const header = document.getElementById('header');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: `-${header.offsetHeight}px 0px 0px 0px`,
+        threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const targetId = e.currentTarget.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if(targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
