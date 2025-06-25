@@ -1,18 +1,12 @@
----
-aliases:
-  - 具身智能在自主水下航行器（AUV）中的应用
-  - 关于水下特殊作业环境中AUV导航、感知与SLAM的前沿调研与思考
-tags: [博士/课题, code/AI/具身智能, AUV, 导航, SLAM, BEV, code/AI/强化学习, code/AI/深度强化学习, code/AI/具身智能/VLA, code/AI/具身智能/VLN, code/AI/具身智能/VA]
-link: >-
-  https://docs.google.com/document/d/1ZTlhS35XQa-FAK93AuYn-eWsvVsZlqKkypzVSOBmPac/edit?usp=sharing
-创建时间: 星期三 25日 六月 2025 15:12:31
-编辑时间: 星期三 25日 六月 2025 16:23:35
-aliases_used: 具身智能在自主水下航行器（AUV）中的应用
----
-
 # 具身智能在自主水下航行器（AUV）中的应用
 
-_——关于水下特殊作业环境中AUV导航、感知与SLAM的前沿调研与思考_
+> 关于水下特殊作业环境中AUV导航、感知与SLAM的前沿调研与思考
+
+**关键词**: 具身智能, AUV, 导航, SLAM, BEV, 强化学习, 深度强化学习, VLA, VLN, VA
+
+**原文档链接**: [Google Docs](https://docs.google.com/document/d/1ZTlhS35XQa-FAK93AuYn-eWsvVsZlqKkypzVSOBmPac/edit?usp=sharing)
+
+**最后更新**: 2025年6月25日
 
 ## 1 引言：具身智能与水下自主性的交汇
 
