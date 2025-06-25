@@ -23,6 +23,7 @@
 website-report/
 ├── index.html                     # 主页面
 ├── README.md                      # 项目文档
+├── LICENSE                        # MIT开源许可证
 ├── EAI_in_AUV/                   # 具身智能在AUV中的应用
 │   ├── index.html
 │   └── EAI_in_AUV.md
@@ -47,8 +48,8 @@ website-report/
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/Chi-hong22/250510_website-report.git
-   cd 250510_website-report
+   git clone https://github.com/Chi-hong22/website-report.git
+   cd website-report
    ```
 
 2. **启动本地服务器**
@@ -67,14 +68,14 @@ website-report/
 
 ### 在线访问
 
-🌍 **已部署版本**：[https://yzarp.top](https://yzarp.top)
+🌍 **已部署版本**：[https://www.yzarp.top](https://www.yzarp.top)
 
 ### 部署到GitHub Pages
 
 1. Fork本项目到你的GitHub账户
 2. 在项目设置中启用GitHub Pages
 3. 选择`main`分支作为发布源
-4. 访问 `https://你的用户名.github.io/250510_website-report`
+4. 访问 `https://你的用户名.github.io/website-report`
 
 ## 💻 技术栈
 
@@ -121,10 +122,10 @@ website-report/
 ## 🎯 项目亮点
 
 ### 1. 研究领域覆盖
-- **具身智能 (Embodied AI)**：机器人感知、决策和行动集成
-- **大模型 (LLM)**：语言模型架构、训练技术和应用
-- **液态神经网络 (LNN)**：新兴AI架构的深度探索
-- **AUV应用**：水下环境中的AI导航和SLAM技术
+- **具身智能 (Embodied AI)**：机器人感知、决策和行动集成系统
+- **大模型 (LLM)**：语言模型架构、训练技术和实际应用场景
+- **液态神经网络 (LNN)**：新兴AI架构的交互式探索
+- **具身智能在AUV中的思考**：水下特殊作业环境中的导航、感知与SLAM技术
 
 ### 2. 技术实现特色
 - 🏗️ **模块化架构**：ProjectNavigator类封装所有功能
@@ -163,6 +164,13 @@ website-report/
 
 感谢所有为AI技术发展做出贡献的研究者和开发者，本项目的研究内容基于众多优秀的学术论文和开源项目。
 
+特别感谢：
+- 具身智能、大模型、SLAM等领域的先驱研究者
+- 开源社区为技术发展提供的宝贵资源
+- 所有关注和支持本项目的朋友们
+
 ---
 
-如果这个项目对你有帮助，请给个⭐️支持一下！ 
+**🌟 如果这个项目对你有帮助，请给个Star支持一下！**
+
+📧 **联系方式**：如有任何问题或建议，欢迎通过GitHub Issues与我交流。 
